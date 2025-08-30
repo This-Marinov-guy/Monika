@@ -54,29 +54,29 @@ function mapLegacyTypeToDesignSystem(type: ThemedTextProps['type']): string {
     case 'subtitle':
       return 'h5';
     default:
-      return type;
+      return type || 'body1';
   }
 }
 
 // Helper function to get font family based on weight
 function getFontFamily(weight: TextStyle['fontWeight']): string {
-  // Use system fonts since we're not loading Satoshi
+  // Use Satoshi font family
   switch (weight) {
     case '900':
     case '800':
-      return 'System';
+      return 'Satoshi-Black';
     case '700':
-      return 'System';
+      return 'Satoshi-Bold';
     case '600':
-      return 'System';
     case '500':
-      return 'System';
-    case '400':
+      return 'Satoshi-Medium';
     case '300':
     case '200':
     case '100':
+      return 'Satoshi-Light';
+    case '400':
     case 'normal':
     default:
-      return 'System';
+      return 'Satoshi-Regular';
   }
 }

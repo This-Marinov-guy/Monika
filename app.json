@@ -11,6 +11,12 @@
     "ios": {
       "supportsTablet": true
     },
+    "fonts": [
+      "./assets/fonts/Satoshi-Regular.otf",
+      "./assets/fonts/Satoshi-Bold.otf",
+      "./assets/fonts/Satoshi-Light.otf",
+      "./assets/fonts/Satoshi-Medium.otf"
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",

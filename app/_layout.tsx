@@ -72,7 +72,7 @@ function RootLayoutContent() {
         headerTintColor: theme.colors.neutral.white,
         headerTitleStyle: {
           fontWeight: '600',
-          fontFamily: 'System',
+          fontFamily: 'Satoshi-Medium',
         },
         contentStyle: {
           backgroundColor: theme.colors.neutral.offWhite,

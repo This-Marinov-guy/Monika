@@ -57,11 +57,11 @@ export function Typography({
   // Get base style for the variant
   const variantStyle = getVariantStyle(variant);
   
-  // Get font family based on weight
-  const fontFamily = getFontFamily(weight || variantStyle.fontWeight);
+  // Get font family based on weight and italic style
+  const fontFamily = getFontFamily(weight || variantStyle.fontWeight, italic);
   
   // Text transformation
-  let textTransform;
+  let textTransform: 'uppercase' | 'lowercase' | 'capitalize' | 'none' | undefined;
   if (uppercase) textTransform = 'uppercase';
   else if (lowercase) textTransform = 'lowercase';
   else if (capitalize) textTransform = 'capitalize';
@@ -72,7 +72,7 @@ export function Typography({
     color: getThemedColor(color),
     textAlign: align,
     fontFamily,
-    fontStyle: italic ? 'italic' : 'normal',
+    fontStyle: 'normal', // We're using dedicated italic fonts instead
     textDecorationLine: underline ? 'underline' : 'none',
     ...(lineHeight && { lineHeight }),
     ...(letterSpacing && { letterSpacing }),
@@ -204,26 +204,47 @@ function getVariantStyle(variant: TypographyVariant): TextStyle {
   }
 }
 
-// Helper function to get font family based on weight
-function getFontFamily(weight: TextStyle['fontWeight']): string {
-  // Use system fonts since we're not loading Satoshi
-  switch (weight) {
-    case '900':
-    case '800':
-      return 'System';
-    case '700':
-      return 'System';
-    case '600':
-      return 'System';
-    case '500':
-      return 'System';
-    case '400':
-    case '300':
-    case '200':
-    case '100':
-    case 'normal':
-    default:
-      return 'System';
+// Helper function to get font family based on weight and italic style
+function getFontFamily(weight: TextStyle['fontWeight'], italic: boolean = false): string {
+  // Use Satoshi font family
+  if (italic) {
+    switch (weight) {
+      case '900':
+      case '800':
+        return 'Satoshi-BlackItalic';
+      case '700':
+        return 'Satoshi-BoldItalic';
+      case '600':
+      case '500':
+        return 'Satoshi-MediumItalic';
+      case '300':
+      case '200':
+      case '100':
+        return 'Satoshi-LightItalic';
+      case '400':
+      case 'normal':
+      default:
+        return 'Satoshi-Italic';
+    }
+  } else {
+    switch (weight) {
+      case '900':
+      case '800':
+        return 'Satoshi-Black';
+      case '700':
+        return 'Satoshi-Bold';
+      case '600':
+      case '500':
+        return 'Satoshi-Medium';
+      case '300':
+      case '200':
+      case '100':
+        return 'Satoshi-Light';
+      case '400':
+      case 'normal':
+      default:
+        return 'Satoshi-Regular';
+    }
   }
 }
 
