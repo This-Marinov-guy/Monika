@@ -1,229 +1,315 @@
-import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { Animated, Dimensions, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Card } from '@/components/Card';
+import { EnhancedButton } from '@/components/EnhancedButton';
+import { PersonCard } from '@/components/PersonCard';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Person } from '@/models/Person';
+import { theme } from '@/constants/Theme';
 
-// Sample data for demonstration
-const SAMPLE_PEOPLE: Person[] = [
+// Sample data
+const SAMPLE_PEOPLE = [
   {
     id: '1',
-    name: 'Sarah Johnson',
+    name: 'Emma Johnson',
     label: 'Girlfriend',
-    image: 'https://picsum.photos/id/64/200',
-    preferences: ['Books', 'Hiking', 'Photography'],
-    importantDates: [
-      {
-        id: '101',
-        type: 'birthday',
-        date: '1995-05-15',
-        reminderDays: [1, 7, 30]
-      },
-      {
-        id: '102',
-        type: 'anniversary',
-        date: '2022-09-22',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '201',
-        name: 'DSLR Camera',
-        description: 'Canon EOS Rebel T7',
-        price: 449.99,
-        occasion: 'birthday'
-      },
-      {
-        id: '202',
-        name: 'Hiking Boots',
-        description: 'Waterproof trail boots',
-        price: 120,
-        occasion: 'anniversary'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: true,
-      enableBirthday: true,
-      enableAnniversary: true,
-      randomDates: 2,
-      reminderDays: [1, 3]
-    }
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Books', 'Travel', 'Coffee', 'Photography', 'Hiking'],
   },
   {
     id: '2',
-    name: 'Mom',
-    label: 'Family',
-    image: 'https://picsum.photos/id/76/200',
+    name: 'Michael Chen',
+    label: 'Best Friend',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Gaming', 'Movies', 'Tech', 'Cooking'],
+  },
+  {
+    id: '3',
+    name: 'Sarah Williams',
+    label: 'Mom',
+    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
     preferences: ['Gardening', 'Cooking', 'Reading'],
-    importantDates: [
-      {
-        id: '103',
-        type: 'birthday',
-        date: '1965-11-03',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '203',
-        name: 'Gardening Kit',
-        description: 'Premium gardening tools set',
-        price: 89.99,
-        occasion: 'birthday'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: false,
-      enableBirthday: true,
-      enableAnniversary: false,
-      randomDates: 1,
-      reminderDays: [1, 3]
-    }
-  }
+  },
+  {
+    id: '4',
+    name: 'David Thompson',
+    label: 'Dad',
+    image: 'https://images.unsplash.com/photo-1546456073-92b9f0a8d413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Golf', 'History', 'Whiskey'],
+  },
 ];
 
-export default function PeopleScreen() {
-  const [people, setPeople] = useState<Person[]>(SAMPLE_PEOPLE);
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+export default function HomeScreen() {
+  const [people, setPeople] = useState(SAMPLE_PEOPLE);
+  const [currentIndex, setCurrentIndex] = useState(0);
   
-  const navigateToPersonDetail = (personId: string) => {
-    router.push(`/person/${personId}`);
+  const handleSwipeLeft = (id: string) => {
+    setCurrentIndex(currentIndex + 1);
   };
   
-  const renderPersonItem = ({ item }: { item: Person }) => (
-    <TouchableOpacity 
-      style={styles.personCard} 
-      onPress={() => navigateToPersonDetail(item.id)}
-    >
-      <ThemedView style={styles.personCardContent}>
-        <Image 
-          source={{ uri: item.image }}
-          style={styles.personImage}
-          contentFit="cover"
-        />
-        <ThemedView style={styles.personInfo}>
-          <ThemedText type="subtitle">{item.name}</ThemedText>
-          <ThemedView style={styles.labelContainer}>
-            <ThemedText style={styles.label}>{item.label}</ThemedText>
-          </ThemedView>
-          <ThemedText style={styles.upcomingDateText}>
-            {item.importantDates[0] ? 
-              `Next: ${new Date(item.importantDates[0].date).toLocaleDateString()}` : 
-              'No upcoming dates'}
+  const handleSwipeRight = (id: string) => {
+    setCurrentIndex(currentIndex + 1);
+  };
+  
+  const handleViewDetails = (id: string) => {
+    router.push(`/person/${id}`);
+  };
+  
+  const renderCards = () => {
+    if (currentIndex >= people.length) {
+      return (
+        <Card variant="elevated" style={styles.noMoreCardsCard}>
+          <ThemedText type="h4" color="neutral.charcoal" style={styles.noMoreCardsText}>
+            No more people to show
           </ThemedText>
-        </ThemedView>
-      </ThemedView>
-    </TouchableOpacity>
-  );
-
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#4BB675', dark: '#2A744A' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.header}>
-          <ThemedText type="title">My People</ThemedText>
-          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-person')}>
-            <ThemedText style={styles.addButtonText}>+</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
+          <ThemedText type="body1" color="neutral.darkGrey" style={styles.noMoreCardsSubtext}>
+            Add more people to your catalog
+          </ThemedText>
+          <EnhancedButton
+            title="Add Person"
+            variant="gradient"
+            onPress={() => router.push('/add-person')}
+            style={styles.addButton}
+          />
+        </Card>
+      );
+    }
+    
+    return people
+      .map((person, i) => {
+        if (i < currentIndex) return null;
         
-        <FlatList
-          data={people}
-          renderItem={renderPersonItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
-          scrollEnabled={false} // Disable scrolling since it's already in ParallaxScrollView
-        />
-      </ThemedView>
-    </ParallaxScrollView>
+        if (i === currentIndex) {
+          return (
+            <PersonCard
+              key={person.id}
+              person={person}
+              onSwipeLeft={handleSwipeLeft}
+              onSwipeRight={handleSwipeRight}
+              onViewDetails={handleViewDetails}
+            />
+          );
+        }
+        
+        // Next card in stack (shown behind current)
+        if (i === currentIndex + 1) {
+          return (
+            <Animated.View
+              key={person.id}
+              style={[styles.nextCardContainer]}
+            >
+              <PersonCard
+                person={person}
+                onViewDetails={handleViewDetails}
+              />
+            </Animated.View>
+          );
+        }
+        
+        return null;
+      })
+      .reverse();
+  };
+  
+  return (
+    <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+      {/* Header */}
+      <LinearGradient
+        colors={[theme.colors.primary.base, theme.colors.secondary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <ThemedText type="h2" color="neutral.white" style={styles.headerTitle}>
+          People
+        </ThemedText>
+        <TouchableOpacity 
+          style={styles.addPersonButton}
+          onPress={() => router.push('/add-person')}
+        >
+          <ThemedText type="h3" color="neutral.white">+</ThemedText>
+        </TouchableOpacity>
+      </LinearGradient>
+      
+      {/* Card Stack */}
+      <View style={styles.cardContainer}>
+        {renderCards()}
+      </View>
+      
+      {/* Bottom Action Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.dislikeButton]}
+            onPress={() => handleSwipeLeft(people[currentIndex].id)}
+          >
+            <ThemedText type="h2" color="error">×</ThemedText>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.likeButton]}
+            onPress={() => handleSwipeRight(people[currentIndex].id)}
+          >
+            <ThemedText type="h2" color="primary.base">♥</ThemedText>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Recent People */}
+        <View style={styles.recentContainer}>
+          <ThemedText type="h6" color="neutral.darkGrey" style={styles.recentTitle}>
+            Recent
+          </ThemedText>
+          <FlatList
+            data={people.slice(0, 4)}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity 
+                style={styles.recentPersonContainer}
+                onPress={() => router.push(`/person/${item.id}`)}
+              >
+                <View style={styles.recentPersonImageContainer}>
+                  {item.image ? (
+                    <View style={styles.recentPersonImage}>
+                      <ThemedText type="body2" color="neutral.white">
+                        {item.name.charAt(0)}
+                      </ThemedText>
+                    </View>
+                  ) : (
+                    <View style={styles.recentPersonImage}>
+                      <ThemedText type="body2" color="neutral.white">
+                        {item.name.charAt(0)}
+                      </ThemedText>
+                    </View>
+                  )}
+                </View>
+                <ThemedText type="caption" color="neutral.charcoal" style={styles.recentPersonName}>
+                  {item.name.split(' ')[0]}
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   header: {
+    height: 120,
+    paddingTop: 50,
+    paddingHorizontal: theme.spacing.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  addButton: {
+  headerTitle: {
+    fontWeight: '700',
+  },
+  addPersonButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#4BB675',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addButtonText: {
-    fontSize: 24,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  listContainer: {
-    gap: 16,
-  },
-  personCard: {
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  personCardContent: {
-    flexDirection: 'row',
-    padding: 0,
-  },
-  personImage: {
-    width: 100,
-    height: 100,
-  },
-  personInfo: {
+  cardContainer: {
     flex: 1,
-    padding: 12,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -20, // Overlap with header
   },
-  labelContainer: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginVertical: 4,
-  },
-  label: {
-    fontSize: 12,
-    color: '#6C757D',
-  },
-  upcomingDateText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  nextCardContainer: {
     position: 'absolute',
+    top: 8,
+    transform: [{ scale: 0.95 }],
     opacity: 0.7,
+  },
+  bottomContainer: {
+    paddingBottom: 30,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: theme.spacing.lg,
+  },
+  actionButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+    marginHorizontal: theme.spacing.md,
+  },
+  likeButton: {
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: theme.colors.primary.base,
+  },
+  dislikeButton: {
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: theme.colors.error,
+  },
+  recentContainer: {
+    paddingHorizontal: theme.spacing.lg,
+  },
+  recentTitle: {
+    marginBottom: theme.spacing.sm,
+  },
+  recentPersonContainer: {
+    alignItems: 'center',
+    marginRight: theme.spacing.md,
+  },
+  recentPersonImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    marginBottom: theme.spacing.xxs,
+    backgroundColor: theme.colors.primary.light,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentPersonImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: theme.colors.primary.base,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentPersonName: {
+    textAlign: 'center',
+  },
+  noMoreCardsCard: {
+    width: SCREEN_WIDTH - 32,
+    height: SCREEN_WIDTH * 1.2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noMoreCardsText: {
+    marginBottom: theme.spacing.sm,
+  },
+  noMoreCardsSubtext: {
+    marginBottom: theme.spacing.xl,
+  },
+  addButton: {
+    marginTop: theme.spacing.md,
   },
 });

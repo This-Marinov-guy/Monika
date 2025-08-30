@@ -1,9 +1,12 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { resetPassword } from '@/services/authService';
 
 export default function ForgotPasswordScreen() {
@@ -38,41 +41,50 @@ export default function ForgotPasswordScreen() {
   
   return (
     <>
-      <Stack.Screen options={{ title: 'Forgot Password' }} />
-      <ThemedView style={styles.container}>
-        <View style={styles.formContainer}>
-          <ThemedText type="title" style={styles.title}>Forgot Password</ThemedText>
-          <ThemedText style={styles.subtitle}>
+      <Stack.Screen options={{ 
+        title: 'Forgot Password',
+        headerStyle: {
+          backgroundColor: theme.colors.primary.base,
+        },
+        headerTintColor: theme.colors.neutral.white,
+      }} />
+      <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+        <ThemedView style={styles.formContainer} variant="cardOutlined">
+          <ThemedText type="h3" style={styles.title} color="primary.base">Forgot Password</ThemedText>
+          <ThemedText type="body1" style={styles.subtitle} color="neutral.darkGrey">
             Enter your email address and we'll send you a link to reset your password.
           </ThemedText>
           
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
+          <Input
+            label="Email"
+            placeholder="Enter your email"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
             editable={!loading}
+            containerStyle={styles.inputContainer}
           />
           
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.disabledButton]}
+          <Button
+            title={loading ? 'Sending...' : 'Send Reset Link'}
             onPress={handleResetPassword}
+            variant="primary"
+            size="md"
             disabled={loading}
-          >
-            <ThemedText style={styles.buttonText}>
-              {loading ? 'Sending...' : 'Send Reset Link'}
-            </ThemedText>
-          </TouchableOpacity>
+            loading={loading}
+            style={styles.resetButton}
+          />
           
-          <TouchableOpacity
-            style={styles.backButton}
+          <Button
+            title="Back to Login"
             onPress={() => router.back()}
-          >
-            <ThemedText style={styles.backButtonText}>Back to Login</ThemedText>
-          </TouchableOpacity>
-        </View>
+            variant="text"
+            size="md"
+            disabled={loading}
+            style={styles.backButton}
+          />
+        </ThemedView>
       </ThemedView>
     </>
   );
@@ -81,54 +93,26 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#F8F9FA',
+    padding: theme.spacing.lg,
   },
   formContainer: {
     width: '100%',
-    marginTop: 40,
+    padding: theme.spacing.lg,
+    marginTop: theme.spacing.xl,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginBottom: 24,
+    marginBottom: theme.spacing.xl,
   },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 16,
-    fontSize: 16,
+  inputContainer: {
+    marginBottom: theme.spacing.lg,
   },
-  button: {
-    backgroundColor: '#4BB675',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  disabledButton: {
-    opacity: 0.7,
+  resetButton: {
+    marginBottom: theme.spacing.md,
   },
   backButton: {
-    alignSelf: 'center',
-    padding: 10,
-  },
-  backButtonText: {
-    color: '#5AA9E6',
-    fontSize: 16,
-    fontWeight: '500',
+    marginBottom: theme.spacing.xs,
   },
 });

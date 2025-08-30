@@ -1,9 +1,12 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { updatePassword } from '@/services/authService';
 
 export default function ChangePasswordScreen() {
@@ -49,47 +52,59 @@ export default function ChangePasswordScreen() {
   
   return (
     <>
-      <Stack.Screen options={{ title: 'Change Password' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Change Password</ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Enter your new password below.
-        </ThemedText>
-        
-        <TextInput
-          style={styles.input}
-          placeholder="New Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          editable={!loading}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm New Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          editable={!loading}
-        />
-        
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.disabledButton]}
-          onPress={handleChangePassword}
-          disabled={loading}
-        >
-          <ThemedText style={styles.buttonText}>
-            {loading ? 'Updating...' : 'Update Password'}
+      <Stack.Screen options={{ 
+        title: 'Change Password',
+        headerStyle: {
+          backgroundColor: theme.colors.primary.base,
+        },
+        headerTintColor: theme.colors.neutral.white,
+      }} />
+      <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+        <ThemedView style={styles.formContainer} variant="card">
+          <ThemedText type="h3" style={styles.title} color="primary.base">Change Password</ThemedText>
+          <ThemedText type="body1" style={styles.subtitle} color="neutral.darkGrey">
+            Enter your new password below.
           </ThemedText>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => router.back()}
-          disabled={loading}
-        >
-          <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
-        </TouchableOpacity>
+          
+          <Input
+            label="New Password"
+            placeholder="Enter new password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            editable={!loading}
+            containerStyle={styles.inputContainer}
+          />
+          
+          <Input
+            label="Confirm New Password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            editable={!loading}
+            containerStyle={styles.inputContainer}
+          />
+          
+          <Button
+            title={loading ? 'Updating...' : 'Update Password'}
+            onPress={handleChangePassword}
+            variant="primary"
+            size="md"
+            disabled={loading}
+            loading={loading}
+            style={styles.updateButton}
+          />
+          
+          <Button
+            title="Cancel"
+            onPress={() => router.back()}
+            variant="text"
+            size="md"
+            disabled={loading}
+            style={styles.cancelButton}
+          />
+        </ThemedView>
       </ThemedView>
     </>
   );
@@ -98,51 +113,28 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#F8F9FA',
+    padding: theme.spacing.lg,
+  },
+  formContainer: {
+    width: '100%',
+    padding: theme.spacing.lg,
+    marginTop: theme.spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginBottom: 24,
+    marginBottom: theme.spacing.xl,
   },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 16,
-    fontSize: 16,
+  inputContainer: {
+    marginBottom: theme.spacing.md,
   },
-  button: {
-    backgroundColor: '#4BB675',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 16,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  disabledButton: {
-    opacity: 0.7,
+  updateButton: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   cancelButton: {
-    padding: 10,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#6C757D',
-    fontSize: 16,
+    marginBottom: theme.spacing.xs,
   },
 });

@@ -2,8 +2,10 @@ import { Stack, router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 
+import { Button } from '@/components/Button';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileScreen() {
@@ -23,53 +25,59 @@ export default function ProfileScreen() {
   
   return (
     <>
-      <Stack.Screen options={{ title: 'Your Profile' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Your Account</ThemedText>
+      <Stack.Screen options={{ 
+        title: 'Your Profile',
+        headerStyle: {
+          backgroundColor: theme.colors.primary.base,
+        },
+        headerTintColor: theme.colors.neutral.white,
+      }} />
+      <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+        <ThemedText type="h2" style={styles.title} color="primary.base">Your Account</ThemedText>
         
-        <ThemedView style={styles.card}>
-          <ThemedText style={styles.sectionTitle}>Account Information</ThemedText>
+        <ThemedView style={styles.card} variant="card">
+          <ThemedText type="h5" style={styles.sectionTitle} color="neutral.charcoal">Account Information</ThemedText>
           
           <ThemedView style={styles.infoRow}>
-            <ThemedText style={styles.label}>Email</ThemedText>
-            <ThemedText style={styles.value}>{user?.email}</ThemedText>
+            <ThemedText type="body2" style={styles.label} color="neutral.darkGrey">Email</ThemedText>
+            <ThemedText type="body1" style={styles.value} color="neutral.charcoal">{user?.email}</ThemedText>
           </ThemedView>
           
           {user?.user_metadata?.name && (
             <ThemedView style={styles.infoRow}>
-              <ThemedText style={styles.label}>Name</ThemedText>
-              <ThemedText style={styles.value}>{user.user_metadata.name}</ThemedText>
+              <ThemedText type="body2" style={styles.label} color="neutral.darkGrey">Name</ThemedText>
+              <ThemedText type="body1" style={styles.value} color="neutral.charcoal">{user.user_metadata.name}</ThemedText>
             </ThemedView>
           )}
         </ThemedView>
         
-        <ThemedView style={styles.optionsContainer}>
+        <ThemedView style={styles.optionsContainer} variant="card">
           <TouchableOpacity 
             style={styles.optionButton}
             onPress={() => router.push('/change-password')}
           >
-            <ThemedText style={styles.optionText}>Change Password</ThemedText>
-            <ThemedText style={styles.arrowIcon}>›</ThemedText>
+            <ThemedText type="body1" color="neutral.charcoal">Change Password</ThemedText>
+            <ThemedText style={styles.arrowIcon} color="neutral.darkGrey">›</ThemedText>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.optionButton}
             onPress={() => router.push('/reminder-settings')}
           >
-            <ThemedText style={styles.optionText}>Notification Settings</ThemedText>
-            <ThemedText style={styles.arrowIcon}>›</ThemedText>
+            <ThemedText type="body1" color="neutral.charcoal">Notification Settings</ThemedText>
+            <ThemedText style={styles.arrowIcon} color="neutral.darkGrey">›</ThemedText>
           </TouchableOpacity>
         </ThemedView>
         
-        <TouchableOpacity 
-          style={[styles.signOutButton, loading && styles.disabledButton]}
+        <Button
+          title={loading ? 'Signing Out...' : 'Sign Out'}
           onPress={handleSignOut}
+          variant="secondary"
+          size="md"
           disabled={loading}
-        >
-          <ThemedText style={styles.signOutButtonText}>
-            {loading ? 'Signing Out...' : 'Sign Out'}
-          </ThemedText>
-        </TouchableOpacity>
+          loading={loading}
+          style={styles.signOutButton}
+        />
       </ThemedView>
     </>
   );
@@ -78,84 +86,47 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#F8F9FA',
+    padding: theme.spacing.lg,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: theme.spacing.xl,
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginBottom: theme.spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: theme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: theme.colors.neutral.lightGrey,
   },
   label: {
     fontSize: 16,
-    color: '#6C757D',
   },
   value: {
     fontSize: 16,
     fontWeight: '500',
   },
   optionsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    marginBottom: 24,
+    marginBottom: theme.spacing.xl,
   },
   optionButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  optionText: {
-    fontSize: 16,
+    borderBottomColor: theme.colors.neutral.lightGrey,
   },
   arrowIcon: {
     fontSize: 22,
-    color: '#6C757D',
   },
   signOutButton: {
-    backgroundColor: '#DC3545',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-  },
-  signOutButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  disabledButton: {
-    opacity: 0.7,
+    backgroundColor: theme.colors.error,
   },
 });

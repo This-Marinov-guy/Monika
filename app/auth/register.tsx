@@ -1,9 +1,13 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { AppIcon } from '@/components/AppIcon';
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { signUpWithEmail } from '@/services/authService';
 
 export default function RegisterScreen() {
@@ -46,60 +50,62 @@ export default function RegisterScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Register', headerShown: false }} />
-      <ThemedView style={styles.container}>
-        <View style={styles.logoContainer}>
-          <Image 
-            source={require('@/assets/images/react-logo.png')} 
-            style={styles.logo} 
-          />
-          <ThemedText type="title" style={styles.title}>Create Account</ThemedText>
-          <ThemedText style={styles.subtitle}>Join Monika Gift & Flower Assistant</ThemedText>
+      <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+        <View style={styles.headerContainer}>
+          <AppIcon size={100} />
+          <ThemedText type="h1" style={styles.title} color="primary.base">Create Account</ThemedText>
+          <ThemedText type="h5" style={styles.subtitle} color="neutral.darkGrey">Join Monika Gift & Flower Assistant</ThemedText>
         </View>
         
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
+        <ThemedView style={styles.formContainer} variant="cardOutlined">
+          <Input
+            label="Email"
+            placeholder="Enter your email"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
             editable={!loading}
+            containerStyle={styles.inputContainer}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
+          
+          <Input
+            label="Password"
+            placeholder="Create a password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             editable={!loading}
+            containerStyle={styles.inputContainer}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
+          
+          <Input
+            label="Confirm Password"
+            placeholder="Confirm your password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
             editable={!loading}
+            containerStyle={styles.inputContainer}
           />
           
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.disabledButton]}
+          <Button
+            title={loading ? 'Creating Account...' : 'Create Account'}
             onPress={handleRegister}
+            variant="primary"
+            size="md"
             disabled={loading}
-          >
-            <ThemedText style={styles.buttonText}>
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </ThemedText>
-          </TouchableOpacity>
+            loading={loading}
+            style={styles.registerButton}
+          />
           
           <View style={styles.loginContainer}>
-            <ThemedText>Already have an account? </ThemedText>
+            <ThemedText type="body2" color="neutral.darkGrey">Already have an account? </ThemedText>
             <TouchableOpacity onPress={() => router.push('/auth/login')}>
-              <ThemedText style={styles.loginText}>Login</ThemedText>
+              <ThemedText type="body2" color="primary.base" style={styles.loginText}>Login</ThemedText>
             </TouchableOpacity>
           </View>
-        </View>
+        </ThemedView>
       </ThemedView>
     </>
   );
@@ -108,62 +114,38 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: theme.spacing.lg,
     justifyContent: 'center',
-    backgroundColor: '#F8F9FA',
   },
-  logoContainer: {
+  headerContainer: {
     alignItems: 'center',
-    marginBottom: 40,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 16,
+    marginBottom: theme.spacing.xxl,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xxs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    marginBottom: theme.spacing.xl,
+    textAlign: 'center',
   },
   formContainer: {
     width: '100%',
+    padding: theme.spacing.lg,
   },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 16,
-    fontSize: 16,
+  inputContainer: {
+    marginBottom: theme.spacing.md,
   },
-  button: {
-    backgroundColor: '#4BB675',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  disabledButton: {
-    opacity: 0.7,
+  registerButton: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: theme.spacing.md,
   },
   loginText: {
-    color: '#4BB675',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });

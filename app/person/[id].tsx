@@ -1,50 +1,37 @@
-import { Image } from 'expo-image';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import {
+    Animated,
+    Dimensions,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
+import { Card } from '@/components/Card';
+import { EnhancedButton } from '@/components/EnhancedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { GiftIdea, ImportantDate, Person } from '@/models/Person';
-import { formatDate } from '@/utils/dateUtils';
+import { theme } from '@/constants/Theme';
 
-// Sample people data (same as in tabs)
-const SAMPLE_PEOPLE: Person[] = [
+// Sample data
+const SAMPLE_PEOPLE = [
   {
     id: '1',
-    name: 'Sarah Johnson',
+    name: 'Emma Johnson',
     label: 'Girlfriend',
-    image: 'https://picsum.photos/id/64/200',
-    preferences: ['Books', 'Hiking', 'Photography'],
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Books', 'Travel', 'Coffee', 'Photography', 'Hiking'],
     importantDates: [
-      {
-        id: '101',
-        type: 'birthday',
-        date: '1995-05-15',
-        reminderDays: [1, 7, 30]
-      },
-      {
-        id: '102',
-        type: 'anniversary',
-        date: '2022-09-22',
-        reminderDays: [1, 7, 30]
-      }
+      { id: '1', type: 'birthday', date: '1995-05-12' },
+      { id: '2', type: 'anniversary', date: '2020-10-15' }
     ],
     giftIdeas: [
-      {
-        id: '201',
-        name: 'DSLR Camera',
-        description: 'Canon EOS Rebel T7',
-        price: 449.99,
-        occasion: 'birthday'
-      },
-      {
-        id: '202',
-        name: 'Hiking Boots',
-        description: 'Waterproof trail boots',
-        price: 120,
-        occasion: 'anniversary'
-      }
+      { id: '1', name: 'Camera Lens', description: 'Wide angle lens for her DSLR', price: 249.99, occasion: 'Birthday', isAiSuggested: false, isPurchased: false },
+      { id: '2', name: 'Coffee Subscription', description: 'Monthly specialty coffee delivery', price: 89.99, occasion: 'Anniversary', isAiSuggested: true, isPurchased: false },
+      { id: '3', name: 'Hiking Boots', description: 'Waterproof boots for our trips', price: 179.99, occasion: 'Christmas', isAiSuggested: true, isPurchased: true }
     ],
     flowerSchedule: {
       enableWomensDay: true,
@@ -52,31 +39,35 @@ const SAMPLE_PEOPLE: Person[] = [
       enableBirthday: true,
       enableAnniversary: true,
       randomDates: 2,
-      reminderDays: [1, 3]
+      reminderDays: [1, 7]
     }
   },
   {
     id: '2',
-    name: 'Mom',
-    label: 'Family',
-    image: 'https://picsum.photos/id/76/200',
-    preferences: ['Gardening', 'Cooking', 'Reading'],
+    name: 'Michael Chen',
+    label: 'Best Friend',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Gaming', 'Movies', 'Tech', 'Cooking'],
     importantDates: [
-      {
-        id: '103',
-        type: 'birthday',
-        date: '1965-11-03',
-        reminderDays: [1, 7, 30]
-      }
+      { id: '3', type: 'birthday', date: '1992-08-24' }
     ],
     giftIdeas: [
-      {
-        id: '203',
-        name: 'Gardening Kit',
-        description: 'Premium gardening tools set',
-        price: 89.99,
-        occasion: 'birthday'
-      }
+      { id: '4', name: 'Gaming Headset', description: 'Noise cancelling with surround sound', price: 129.99, occasion: 'Birthday', isAiSuggested: false, isPurchased: false },
+      { id: '5', name: 'Cooking Class', description: 'Italian cuisine masterclass', price: 75, occasion: 'Christmas', isAiSuggested: true, isPurchased: false }
+    ]
+  },
+  {
+    id: '3',
+    name: 'Sarah Williams',
+    label: 'Mom',
+    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Gardening', 'Cooking', 'Reading'],
+    importantDates: [
+      { id: '6', type: 'birthday', date: '1965-03-18' }
+    ],
+    giftIdeas: [
+      { id: '7', name: 'Gardening Set', description: 'Premium tools with carrying case', price: 89.99, occasion: 'Birthday', isAiSuggested: false, isPurchased: false },
+      { id: '8', name: 'Cookbook Collection', description: 'Set of international cuisine books', price: 65, occasion: 'Christmas', isAiSuggested: true, isPurchased: true }
     ],
     flowerSchedule: {
       enableWomensDay: true,
@@ -86,237 +77,385 @@ const SAMPLE_PEOPLE: Person[] = [
       randomDates: 1,
       reminderDays: [1, 3]
     }
-  }
+  },
+  {
+    id: '4',
+    name: 'David Thompson',
+    label: 'Dad',
+    image: 'https://images.unsplash.com/photo-1546456073-92b9f0a8d413?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    preferences: ['Golf', 'History', 'Whiskey'],
+    importantDates: [
+      { id: '9', type: 'birthday', date: '1962-09-05' }
+    ],
+    giftIdeas: [
+      { id: '10', name: 'Golf Club Set', description: 'Professional irons', price: 499.99, occasion: 'Birthday', isAiSuggested: false, isPurchased: false },
+      { id: '11', name: 'Whiskey Tasting Kit', description: 'Premium scotch sampler', price: 120, occasion: 'Father\'s Day', isAiSuggested: true, isPurchased: false }
+    ]
+  },
 ];
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const HEADER_MAX_HEIGHT = 300;
+const HEADER_MIN_HEIGHT = 90;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function PersonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [person, setPerson] = useState<Person | null>(null);
+  const [person, setPerson] = useState(SAMPLE_PEOPLE.find(p => p.id === id));
+  const scrollY = useRef(new Animated.Value(0)).current;
   
-  useEffect(() => {
-    // In a real app, you would fetch this data from a database or API
-    const foundPerson = SAMPLE_PEOPLE.find(p => p.id === id);
-    if (foundPerson) {
-      setPerson(foundPerson);
+  // Format date to display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+  
+  // Calculate days until date
+  const daysUntil = (dateString: string) => {
+    const today = new Date();
+    const targetDate = new Date(dateString);
+    
+    // Set target date to this year
+    targetDate.setFullYear(today.getFullYear());
+    
+    // If the date has already passed this year, set to next year
+    if (targetDate < today) {
+      targetDate.setFullYear(today.getFullYear() + 1);
     }
-  }, [id]);
+    
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  // Animations for the header
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+  
+  const headerTitleOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, 0.5, 1],
+    extrapolate: 'clamp',
+  });
+  
+  const imageOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+  
+  const imageTranslate = scrollY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
   
   if (!person) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>Loading...</ThemedText>
+        <ThemedText>Person not found</ThemedText>
       </ThemedView>
     );
   }
   
-  const renderImportantDateItem = ({ item }: { item: ImportantDate }) => (
-    <ThemedView style={styles.dateCard}>
-      <ThemedView style={styles.dateInfo}>
-        <ThemedText style={styles.dateTypeText}>
-          {item.type === 'birthday' ? 'Birthday' : 
-           item.type === 'anniversary' ? 'Anniversary' : 
-           item.name || 'Custom Date'}
-        </ThemedText>
-        <ThemedText style={styles.dateValue}>{formatDate(item.date)}</ThemedText>
-      </ThemedView>
-      
-      <TouchableOpacity style={styles.editButton} onPress={() => router.push(`/edit-date/${item.id}?personId=${person.id}`)}>
-        <ThemedText style={styles.editButtonText}>Edit</ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
-  );
-  
-  const renderGiftItem = ({ item }: { item: GiftIdea }) => (
-    <TouchableOpacity 
-      style={styles.giftCard} 
-      onPress={() => router.push(`/gift-detail/${item.id}?personId=${person.id}`)}
-    >
-      <ThemedView style={styles.giftInfo}>
-        <ThemedText style={styles.giftName}>{item.name}</ThemedText>
-        {item.description && (
-          <ThemedText style={styles.giftDescription}>{item.description}</ThemedText>
-        )}
-        <ThemedView style={styles.giftMeta}>
-          {item.price && (
-            <ThemedText style={styles.giftPrice}>${item.price.toFixed(2)}</ThemedText>
-          )}
-          {item.occasion && (
-            <ThemedView style={styles.occasionContainer}>
-              <ThemedText style={styles.occasionText}>{item.occasion}</ThemedText>
-            </ThemedView>
-          )}
-        </ThemedView>
-        {item.isAiSuggested && (
-          <ThemedView style={styles.aiSuggestedContainer}>
-            <ThemedText style={styles.aiSuggestedText}>AI Suggested</ThemedText>
-          </ThemedView>
-        )}
-        {item.isPurchased && (
-          <ThemedView style={styles.purchasedContainer}>
-            <ThemedText style={styles.purchasedText}>Purchased</ThemedText>
-          </ThemedView>
-        )}
-      </ThemedView>
-    </TouchableOpacity>
-  );
-  
   return (
     <>
-      <Stack.Screen options={{ title: person.name }} />
-      <ScrollView style={styles.container}>
-        <ThemedView style={styles.header}>
-          <Image 
-            source={{ uri: person.image }}
-            style={styles.personImage}
-            contentFit="cover"
+      <Stack.Screen 
+        options={{ 
+          headerShown: false,
+        }} 
+      />
+      
+      <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+        {/* Animated Header */}
+        <Animated.View style={[styles.header, { height: headerHeight }]}>
+          <Animated.Image
+            style={[
+              styles.headerImage,
+              {
+                opacity: imageOpacity,
+                transform: [{ translateY: imageTranslate }],
+              },
+            ]}
+            source={person.image ? { uri: person.image } : require('@/assets/images/app/default-profile.png')}
           />
           
-          <ThemedView style={styles.personInfo}>
-            <ThemedText type="title">{person.name}</ThemedText>
-            <ThemedView style={styles.labelContainer}>
-              <ThemedText style={styles.labelText}>{person.label}</ThemedText>
-            </ThemedView>
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={() => router.push(`/edit-person/${person.id}`)}
-            >
-              <ThemedText style={styles.editButtonText}>Edit Profile</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-        </ThemedView>
-        
-        <TouchableOpacity 
-          style={styles.notificationSettingsButton}
-          onPress={() => router.push(`/reminder-settings?personId=${person.id}`)}
-        >
-          <ThemedText style={styles.notificationSettingsText}>
-            Notification Settings
-          </ThemedText>
-          <ThemedView style={styles.notificationSettingsBadges}>
-            <ThemedView style={styles.notificationBadge}>
-              <ThemedText style={styles.notificationBadgeText}>Push</ThemedText>
-            </ThemedView>
-            <ThemedView style={[styles.notificationBadge, styles.calendarBadge]}>
-              <ThemedText style={styles.notificationBadgeText}>Calendar</ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </TouchableOpacity>
-        
-        {person.preferences && person.preferences.length > 0 && (
-          <ThemedView style={styles.section}>
-            <ThemedText type="subtitle">Preferences</ThemedText>
-            <ThemedView style={styles.preferencesContainer}>
-              {person.preferences.map((preference, index) => (
-                <ThemedView key={index} style={styles.preferenceTag}>
-                  <ThemedText style={styles.preferenceText}>{preference}</ThemedText>
-                </ThemedView>
-              ))}
-            </ThemedView>
-          </ThemedView>
-        )}
-        
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText type="subtitle">Important Dates</ThemedText>
-            <TouchableOpacity 
-              style={styles.addButton} 
-              onPress={() => router.push(`/add-date?personId=${person.id}`)}
-            >
-              <ThemedText style={styles.addButtonText}>+</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.7)']}
+            style={styles.headerGradient}
+          />
           
-          {person.importantDates.length > 0 ? (
-            <FlatList
-              data={person.importantDates}
-              renderItem={renderImportantDateItem}
-              keyExtractor={item => item.id}
-              scrollEnabled={false} // Disable scrolling as it's already inside ScrollView
-              contentContainerStyle={styles.datesContainer}
-            />
-          ) : (
-            <ThemedText style={styles.emptyText}>No important dates added yet</ThemedText>
-          )}
-        </ThemedView>
-        
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText type="subtitle">Gift Ideas</ThemedText>
-            <TouchableOpacity 
-              style={styles.addButton} 
-              onPress={() => router.push(`/add-gift?personId=${person.id}`)}
-            >
-              <ThemedText style={styles.addButtonText}>+</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-          
-          {person.giftIdeas.length > 0 ? (
-            <FlatList
-              data={person.giftIdeas}
-              renderItem={renderGiftItem}
-              keyExtractor={item => item.id}
-              scrollEnabled={false} // Disable scrolling as it's already inside ScrollView
-              contentContainerStyle={styles.giftsContainer}
-            />
-          ) : (
-            <ThemedText style={styles.emptyText}>No gift ideas added yet</ThemedText>
-          )}
-          
+          {/* Back button */}
           <TouchableOpacity 
-            style={styles.aiButton}
-            onPress={() => router.push(`/ai-gift-suggestions?personId=${person.id}`)}
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-            <ThemedText style={styles.aiButtonText}>Get AI Gift Suggestions</ThemedText>
+            <ThemedText type="h4" color="neutral.white">←</ThemedText>
           </TouchableOpacity>
-        </ThemedView>
-        
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText type="subtitle">Flower Schedule</ThemedText>
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={() => router.push(`/flower-settings/${person.id}`)}
-            >
-              <ThemedText style={styles.editButtonText}>Edit</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
           
-          {person.flowerSchedule ? (
-            <ThemedView style={styles.flowerScheduleContainer}>
-              <ThemedView style={styles.flowerSettingRow}>
-                <ThemedText>Women's Day (March 8)</ThemedText>
-                <ThemedText>{person.flowerSchedule.enableWomensDay ? '✓' : '✗'}</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.flowerSettingRow}>
-                <ThemedText>Valentine's Day (Feb 14)</ThemedText>
-                <ThemedText>{person.flowerSchedule.enableValentinesDay ? '✓' : '✗'}</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.flowerSettingRow}>
-                <ThemedText>Birthday</ThemedText>
-                <ThemedText>{person.flowerSchedule.enableBirthday ? '✓' : '✗'}</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.flowerSettingRow}>
-                <ThemedText>Anniversary</ThemedText>
-                <ThemedText>{person.flowerSchedule.enableAnniversary ? '✓' : '✗'}</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.flowerSettingRow}>
-                <ThemedText>Random flowers per month</ThemedText>
-                <ThemedText>{person.flowerSchedule.randomDates}</ThemedText>
-              </ThemedView>
-            </ThemedView>
-          ) : (
-            <ThemedView style={styles.flowerScheduleContainer}>
-              <ThemedText style={styles.emptyText}>No flower schedule set up</ThemedText>
-              <TouchableOpacity 
-                style={styles.setupButton} 
-                onPress={() => router.push(`/flower-settings/${person.id}`)}
-              >
-                <ThemedText style={styles.setupButtonText}>Set Up Schedule</ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
+          {/* Header Content */}
+          <Animated.View 
+            style={[
+              styles.headerContent,
+              {
+                opacity: imageOpacity,
+              },
+            ]}
+          >
+            <ThemedText type="h1" color="neutral.white" style={styles.personName}>
+              {person.name}
+            </ThemedText>
+            <View style={styles.labelContainer}>
+              <ThemedText type="body1" color="neutral.white" style={styles.personLabel}>
+                {person.label}
+              </ThemedText>
+            </View>
+          </Animated.View>
+          
+          {/* Compact Header Title (visible on scroll) */}
+          <Animated.View 
+            style={[
+              styles.headerTitle,
+              {
+                opacity: headerTitleOpacity,
+              },
+            ]}
+          >
+            <ThemedText type="h4" color="neutral.white">
+              {person.name}
+            </ThemedText>
+          </Animated.View>
+        </Animated.View>
+        
+        {/* Content */}
+        <Animated.ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
           )}
-        </ThemedView>
-      </ScrollView>
+        >
+          {/* Preferences Section */}
+          <Card variant="default" style={styles.section}>
+            <ThemedText type="h4" style={styles.sectionTitle} color="primary.base">
+              Preferences
+            </ThemedText>
+            <View style={styles.preferencesContainer}>
+              {person.preferences?.map((preference, index) => (
+                <View key={index} style={styles.preferenceTag}>
+                  <ThemedText type="body2" color="neutral.charcoal">
+                    {preference}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          </Card>
+          
+          {/* Important Dates Section */}
+          <Card variant="default" style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText type="h4" style={styles.sectionTitle} color="primary.base">
+                Important Dates
+              </ThemedText>
+              <EnhancedButton
+                title="Add"
+                variant="outline"
+                size="sm"
+                onPress={() => router.push(`/add-date?personId=${person.id}`)}
+                style={styles.addButton}
+              />
+            </View>
+            
+            {person.importantDates && person.importantDates.length > 0 ? (
+              person.importantDates.map((date) => (
+                <Card key={date.id} variant="subtle" style={styles.dateCard}>
+                  <View style={styles.dateCardContent}>
+                    <View>
+                      <ThemedText type="h6" color="neutral.charcoal">
+                        {date.type.charAt(0).toUpperCase() + date.type.slice(1)}
+                      </ThemedText>
+                      <ThemedText type="body2" color="neutral.darkGrey">
+                        {formatDate(date.date)}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.daysContainer}>
+                      <ThemedText type="h4" color={daysUntil(date.date) <= 30 ? "primary.base" : "neutral.charcoal"}>
+                        {daysUntil(date.date)}
+                      </ThemedText>
+                      <ThemedText type="caption" color="neutral.darkGrey">
+                        days
+                      </ThemedText>
+                    </View>
+                  </View>
+                </Card>
+              ))
+            ) : (
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.emptyText}>
+                No important dates added yet
+              </ThemedText>
+            )}
+          </Card>
+          
+          {/* Gift Ideas Section */}
+          <Card variant="default" style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText type="h4" style={styles.sectionTitle} color="primary.base">
+                Gift Ideas
+              </ThemedText>
+              <View style={styles.giftButtonsContainer}>
+                <EnhancedButton
+                  title="AI Suggest"
+                  variant="gradient"
+                  size="sm"
+                  onPress={() => router.push(`/ai-gift-suggestions?personId=${person.id}`)}
+                  style={styles.aiButton}
+                  gradientColors={[theme.colors.secondary.dark, theme.colors.secondary.base]}
+                />
+                <EnhancedButton
+                  title="Add"
+                  variant="outline"
+                  size="sm"
+                  onPress={() => router.push(`/add-gift?personId=${person.id}`)}
+                  style={styles.addButton}
+                />
+              </View>
+            </View>
+            
+            {person.giftIdeas && person.giftIdeas.length > 0 ? (
+              <FlatList
+                data={person.giftIdeas}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.giftListContainer}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <Card 
+                    variant={item.isAiSuggested ? "gradient" : (item.isPurchased ? "subtle" : "elevated")}
+                    style={styles.giftCard}
+                    gradientColors={item.isAiSuggested ? [theme.colors.secondary.dark, theme.colors.secondary.base] : undefined}
+                    onPress={() => router.push(`/gift-detail?id=${item.id}&personId=${person.id}`)}
+                  >
+                    <View style={styles.giftCardContent}>
+                      <ThemedText 
+                        type="h6" 
+                        color={item.isAiSuggested ? "neutral.white" : "neutral.charcoal"}
+                        numberOfLines={1}
+                      >
+                        {item.name}
+                      </ThemedText>
+                      
+                      <ThemedText 
+                        type="caption" 
+                        color={item.isAiSuggested ? "neutral.lightGrey" : "neutral.darkGrey"}
+                        style={styles.giftOccasion}
+                        numberOfLines={1}
+                      >
+                        For: {item.occasion}
+                      </ThemedText>
+                      
+                      <ThemedText 
+                        type="body1" 
+                        color={item.isAiSuggested ? "neutral.white" : "primary.base"}
+                        style={styles.giftPrice}
+                      >
+                        ${item.price?.toFixed(2)}
+                      </ThemedText>
+                      
+                      {item.isPurchased && (
+                        <View style={styles.purchasedBadge}>
+                          <ThemedText type="caption" color="neutral.white">
+                            Purchased
+                          </ThemedText>
+                        </View>
+                      )}
+                      
+                      {item.isAiSuggested && !item.isPurchased && (
+                        <View style={styles.aiBadge}>
+                          <ThemedText type="caption" color="neutral.white">
+                            AI Suggested
+                          </ThemedText>
+                        </View>
+                      )}
+                    </View>
+                  </Card>
+                )}
+              />
+            ) : (
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.emptyText}>
+                No gift ideas added yet
+              </ThemedText>
+            )}
+          </Card>
+          
+          {/* Flower Schedule Section */}
+          {person.flowerSchedule && (
+            <Card variant="default" style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <ThemedText type="h4" style={styles.sectionTitle} color="primary.base">
+                  Flower Schedule
+                </ThemedText>
+                <EnhancedButton
+                  title="Edit"
+                  variant="outline"
+                  size="sm"
+                  onPress={() => router.push(`/flower-settings/${person.id}`)}
+                  style={styles.addButton}
+                />
+              </View>
+              
+              <View style={styles.flowerScheduleContainer}>
+                {person.flowerSchedule.enableBirthday && (
+                  <View style={styles.flowerItem}>
+                    <View style={[styles.flowerDot, { backgroundColor: theme.colors.primary.base }]} />
+                    <ThemedText type="body2" color="neutral.charcoal">Birthday</ThemedText>
+                  </View>
+                )}
+                
+                {person.flowerSchedule.enableAnniversary && (
+                  <View style={styles.flowerItem}>
+                    <View style={[styles.flowerDot, { backgroundColor: theme.colors.primary.base }]} />
+                    <ThemedText type="body2" color="neutral.charcoal">Anniversary</ThemedText>
+                  </View>
+                )}
+                
+                {person.flowerSchedule.enableValentinesDay && (
+                  <View style={styles.flowerItem}>
+                    <View style={[styles.flowerDot, { backgroundColor: theme.colors.primary.base }]} />
+                    <ThemedText type="body2" color="neutral.charcoal">Valentine's Day</ThemedText>
+                  </View>
+                )}
+                
+                {person.flowerSchedule.enableWomensDay && (
+                  <View style={styles.flowerItem}>
+                    <View style={[styles.flowerDot, { backgroundColor: theme.colors.primary.base }]} />
+                    <ThemedText type="body2" color="neutral.charcoal">Women's Day</ThemedText>
+                  </View>
+                )}
+                
+                {person.flowerSchedule.randomDates > 0 && (
+                  <View style={styles.flowerItem}>
+                    <View style={[styles.flowerDot, { backgroundColor: theme.colors.secondary.base }]} />
+                    <ThemedText type="body2" color="neutral.charcoal">
+                      {person.flowerSchedule.randomDates} random {person.flowerSchedule.randomDates === 1 ? 'date' : 'dates'} per month
+                    </ThemedText>
+                  </View>
+                )}
+              </View>
+            </Card>
+          )}
+          
+          {/* Bottom padding for scrolling */}
+          <View style={styles.bottomPadding} />
+        </Animated.ScrollView>
+      </ThemedView>
     </>
   );
 }
@@ -324,265 +463,182 @@ export default function PersonDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
   },
   header: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    overflow: 'hidden',
+    zIndex: 10,
   },
-  notificationSettingsButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  headerImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    width: null,
+    height: HEADER_MAX_HEIGHT,
+    resizeMode: 'cover',
+  },
+  headerGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+  },
+  headerContent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: theme.spacing.lg,
+  },
+  headerTitle: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: HEADER_MIN_HEIGHT,
+    paddingHorizontal: theme.spacing.lg,
     alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 16,
-    marginTop: 16,
-    marginBottom: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  notificationSettingsText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#343A40',
-  },
-  notificationSettingsBadges: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  notificationBadge: {
-    backgroundColor: '#4BB675',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  calendarBadge: {
-    backgroundColor: '#5AA9E6',
-  },
-  notificationBadgeText: {
-    color: 'white',
-    fontSize: 12,
-  },
-  personImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    backgroundColor: '#E9ECEF',
-  },
-  personInfo: {
-    flex: 1,
-    marginLeft: 16,
     justifyContent: 'center',
   },
-  labelContainer: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginVertical: 4,
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: theme.spacing.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
-  labelText: {
-    fontSize: 12,
-    color: '#6C757D',
+  personName: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  labelContainer: {
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xxs,
+    borderRadius: theme.borderRadius.full,
+    alignSelf: 'flex-start',
+  },
+  personLabel: {
+    fontWeight: '500',
+  },
+  scrollViewContent: {
+    paddingTop: HEADER_MAX_HEIGHT,
+    padding: theme.spacing.md,
   },
   section: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    marginBottom: theme.spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.md,
+  },
+  sectionTitle: {
+    fontWeight: '600',
+  },
+  addButton: {
+    height: 36,
+    paddingHorizontal: theme.spacing.md,
   },
   preferencesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 8,
   },
   preferenceTag: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  preferenceText: {
-    fontSize: 14,
-    color: '#343A40',
-  },
-  datesContainer: {
-    marginTop: 8,
-    gap: 8,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xxs,
+    borderRadius: theme.borderRadius.full,
+    marginRight: theme.spacing.xs,
+    marginBottom: theme.spacing.xs,
   },
   dateCard: {
+    marginBottom: theme.spacing.sm,
+  },
+  dateCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
   },
-  dateInfo: {
-    flex: 1,
+  daysContainer: {
+    alignItems: 'center',
   },
-  dateTypeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#343A40',
-  },
-  dateValue: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 2,
-  },
-  giftsContainer: {
-    marginTop: 8,
-    gap: 12,
-  },
-  giftCard: {
-    padding: 12,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-  },
-  giftInfo: {
-    gap: 4,
-  },
-  giftName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#343A40',
-  },
-  giftDescription: {
-    fontSize: 14,
-    color: '#6C757D',
-  },
-  giftMeta: {
+  giftButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  giftPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4BB675',
-  },
-  occasionContainer: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  occasionText: {
-    fontSize: 12,
-    color: '#6C757D',
-  },
-  aiSuggestedContainer: {
-    backgroundColor: '#8FDC9F',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  aiSuggestedText: {
-    fontSize: 12,
-    color: '#2A744A',
-  },
-  purchasedContainer: {
-    backgroundColor: '#7BBCEF',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  purchasedText: {
-    fontSize: 12,
-    color: '#2C79B9',
-  },
-  addButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#4BB675',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonText: {
-    fontSize: 18,
-    color: 'white',
-    fontWeight: 'bold',
-    lineHeight: 20,
-  },
-  editButton: {
-    marginTop: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#E9ECEF',
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-  },
-  editButtonText: {
-    fontSize: 12,
-    color: '#6C757D',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#6C757D',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: 16,
   },
   aiButton: {
-    marginTop: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#5AA9E6',
-    borderRadius: 8,
-    alignItems: 'center',
+    height: 36,
+    paddingHorizontal: theme.spacing.md,
+    marginRight: theme.spacing.xs,
   },
-  aiButtonText: {
-    fontSize: 16,
+  giftListContainer: {
+    paddingBottom: theme.spacing.sm,
+  },
+  giftCard: {
+    width: 180,
+    marginRight: theme.spacing.md,
+    height: 130,
+  },
+  giftCardContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  giftOccasion: {
+    marginTop: theme.spacing.xxs,
+  },
+  giftPrice: {
     fontWeight: '600',
-    color: 'white',
+    marginTop: theme.spacing.xs,
+  },
+  purchasedBadge: {
+    position: 'absolute',
+    top: -theme.spacing.xxs,
+    right: -theme.spacing.xxs,
+    backgroundColor: theme.colors.primary.base,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.xs,
+  },
+  aiBadge: {
+    position: 'absolute',
+    top: -theme.spacing.xxs,
+    right: -theme.spacing.xxs,
+    backgroundColor: theme.colors.secondary.base,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.xs,
+  },
+  emptyText: {
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: theme.spacing.md,
   },
   flowerScheduleContainer: {
-    marginTop: 8,
-    gap: 8,
+    marginTop: theme.spacing.sm,
   },
-  flowerSettingRow: {
+  flowerItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  setupButton: {
-    marginTop: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#F8C8DC',
-    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: theme.spacing.sm,
   },
-  setupButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#803D52',
+  flowerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: theme.spacing.sm,
+  },
+  bottomPadding: {
+    height: 100,
   },
 });

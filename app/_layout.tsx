@@ -1,10 +1,12 @@
-import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import useFonts from '@/hooks/useFonts';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -16,9 +18,7 @@ SplashScreen.preventAutoHideAsync();
 
 // Root layout component
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    'SpaceMono': require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const { fontsLoaded, error } = useFonts();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -26,19 +26,21 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
-  if (!loaded) {
+  if (!fontsLoaded) {
     return null;
   }
 
   return (
-    <AuthProvider>
-      <RootLayoutContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RootLayoutContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
@@ -56,13 +58,27 @@ function RootLayoutContent() {
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4BB675" />
+        <ActivityIndicator size="large" color={theme.colors.primary.base} />
       </ThemedView>
     );
   }
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.primary.base,
+        },
+        headerTintColor: theme.colors.neutral.white,
+        headerTitleStyle: {
+          fontWeight: '600',
+          fontFamily: 'Satoshi-SemiBold',
+        },
+        contentStyle: {
+          backgroundColor: theme.colors.neutral.offWhite,
+        },
+      }}
+    >
       {/* If not authenticated, redirect to auth screens */}
       {!session && (
         <>
@@ -91,6 +107,8 @@ function RootLayoutContent() {
           <Stack.Screen name="reminder-settings" options={{ headerTitle: 'Notification Settings' }} />
           <Stack.Screen name="flower-settings/[id]" options={{ headerTitle: 'Flower Settings' }} />
           <Stack.Screen name="ai-gift-suggestions" options={{ headerTitle: 'AI Gift Suggestions' }} />
+          <Stack.Screen name="profile" options={{ headerTitle: 'Your Profile' }} />
+          <Stack.Screen name="change-password" options={{ headerTitle: 'Change Password' }} />
         </>
       )}
     </Stack>
