@@ -9,24 +9,14 @@ export default function useFonts() {
     async function loadFonts() {
       try {
         await Font.loadAsync({
-          // Default system fonts as fallbacks
-          'System-Regular': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'normal'),
-          'System-Medium': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'medium'),
-          'System-Bold': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'bold'),
-          
           // SpaceMono font
           'SpaceMono': require('../assets/fonts/SpaceMono-Regular.ttf'),
-          
-          // Use system fonts as substitutes for Satoshi until we have the actual font files
-          'Satoshi-Regular': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'normal'),
-          'Satoshi-Medium': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'medium'),
-          'Satoshi-SemiBold': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'semibold'),
-          'Satoshi-Bold': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'bold'),
-          'Satoshi-Black': require('expo-font/build/FontLoader').FontLoader.resolveAsync('System', 'bold'),
         });
         setFontsLoaded(true);
       } catch (e) {
-        setError(e as Error);
+        console.warn('Font loading error:', e);
+        // Even if fonts fail to load, we can continue with system fonts
+        setFontsLoaded(true);
       }
     }
 

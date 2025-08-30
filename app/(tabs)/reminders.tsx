@@ -1,360 +1,736 @@
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Card } from '@/components/Card';
+import { EnhancedButton } from '@/components/EnhancedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Reminder } from '@/models/Reminder';
-import { formatDate } from '@/utils/dateUtils';
+import { theme } from '@/constants/Theme';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-// Sample reminders for demonstration
-const SAMPLE_REMINDERS: Reminder[] = [
+// Sample reminders data
+const SAMPLE_REMINDERS = [
   {
     id: '1',
-    personId: '1',
-    personName: 'Sarah Johnson',
-    title: 'Birthday Gift',
-    description: 'Buy DSLR Camera',
-    date: '2023-05-15', // Update with future date for demo
-    type: 'gift',
-    isRead: false
+    personId: '3',
+    personName: 'Sarah Williams',
+    personImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    title: 'Birthday Reminder',
+    description: "Sarah's birthday is coming up",
+    date: '2024-03-18',
+    time: '09:00',
+    daysUntil: 12,
+    type: 'birthday',
+    isActive: true,
+    hasGoogleCalendar: true,
+    hasPushNotification: true,
+    priority: 'high'
   },
   {
     id: '2',
     personId: '1',
-    personName: 'Sarah Johnson',
-    title: "Valentine's Day Flowers",
-    description: 'Remember to get roses',
-    date: '2023-02-14', // Update with future date for demo
-    type: 'flowers',
-    isRead: true
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    title: 'Anniversary Gift Shopping',
+    description: 'Start looking for anniversary gift ideas',
+    date: '2024-04-22',
+    time: '10:00',
+    daysUntil: 47,
+    type: 'gift_shopping',
+    isActive: true,
+    hasGoogleCalendar: false,
+    hasPushNotification: true,
+    priority: 'medium'
   },
   {
     id: '3',
-    personId: '2',
-    personName: 'Mom',
-    title: 'Birthday Gift',
-    description: 'Gardening Kit',
-    date: '2023-11-03', // Update with future date for demo
-    type: 'gift',
-    isRead: false
+    personId: '1',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    title: 'Birthday Celebration',
+    description: "Emma's birthday party",
+    date: '2024-05-12',
+    time: '18:00',
+    daysUntil: 67,
+    type: 'birthday',
+    isActive: true,
+    hasGoogleCalendar: true,
+    hasPushNotification: true,
+    priority: 'high'
   },
   {
     id: '4',
+    personId: '5',
+    personName: 'Lisa Rodriguez',
+    personImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    title: 'Anniversary Dinner',
+    description: 'Book restaurant for anniversary',
+    date: '2024-06-10',
+    time: '19:30',
+    daysUntil: 96,
+    type: 'anniversary',
+    isActive: true,
+    hasGoogleCalendar: true,
+    hasPushNotification: false,
+    priority: 'high'
+  },
+  {
+    id: '5',
     personId: '2',
-    personName: 'Mom',
-    title: "Women's Day Flowers",
-    description: 'Get her favorite tulips',
-    date: '2023-03-08', // Update with future date for demo
-    type: 'flowers',
-    isRead: false
+    personName: 'Michael Chen',
+    personImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    title: 'Check on Michael',
+    description: 'Catch up with Michael over coffee',
+    date: '2024-03-25',
+    time: '15:00',
+    daysUntil: 19,
+    type: 'general',
+    isActive: false,
+    hasGoogleCalendar: false,
+    hasPushNotification: true,
+    priority: 'low'
   }
 ];
 
+const FILTER_OPTIONS = [
+  { key: 'all', label: 'All', icon: 'notifications', count: SAMPLE_REMINDERS.length },
+  { key: 'active', label: 'Active', icon: 'notifications', count: SAMPLE_REMINDERS.filter(r => r.isActive).length },
+  { key: 'urgent', label: 'Urgent', icon: 'alert-circle', count: SAMPLE_REMINDERS.filter(r => r.daysUntil <= 14 && r.isActive).length },
+  { key: 'birthdays', label: 'Birthdays', icon: 'gift', count: SAMPLE_REMINDERS.filter(r => r.type === 'birthday').length }
+];
+
+const REMINDER_TYPE_ICONS = {
+  birthday: 'gift',
+  anniversary: 'heart',
+  gift_shopping: 'bag',
+  general: 'bookmark'
+};
+
 export default function RemindersScreen() {
-  const [reminders, setReminders] = useState<Reminder[]>(SAMPLE_REMINDERS);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'gift' | 'flowers'>('all');
+  const [reminders] = useState(SAMPLE_REMINDERS);
+  const [selectedFilter, setSelectedFilter] = useState('all');
   
   const filteredReminders = reminders.filter(reminder => {
-    if (filter === 'all') return true;
-    if (filter === 'unread') return !reminder.isRead;
-    return reminder.type === filter;
-  });
-  
-  const markAsRead = (id: string) => {
-    setReminders(prev => prev.map(reminder => 
-      reminder.id === id ? { ...reminder, isRead: true } : reminder
-    ));
-  };
-  
-  const navigateToReminderDetail = (reminder: Reminder) => {
-    markAsRead(reminder.id);
-    
-    if (reminder.type === 'gift') {
-      router.push({
-        pathname: `/gift-detail/${reminder.id}`,
-        params: { personId: reminder.personId, fromReminder: true }
-      });
-    } else {
-      router.push({
-        pathname: `/flower-detail/${reminder.id}`,
-        params: { personId: reminder.personId, fromReminder: true }
-      });
+    switch (selectedFilter) {
+      case 'active':
+        return reminder.isActive;
+      case 'urgent':
+        return reminder.daysUntil <= 14 && reminder.isActive;
+      case 'birthdays':
+        return reminder.type === 'birthday';
+      default:
+        return true;
     }
+  }).sort((a, b) => a.daysUntil - b.daysUntil);
+  
+  const upcomingReminders = reminders.filter(r => r.isActive && r.daysUntil <= 7).sort((a, b) => a.daysUntil - b.daysUntil);
+  const activeCount = reminders.filter(r => r.isActive).length;
+  const urgentCount = reminders.filter(r => r.daysUntil <= 14 && r.isActive).length;
+  
+  const renderReminderCard = ({ item }: { item: typeof SAMPLE_REMINDERS[0] }) => {
+    const isUrgent = item.daysUntil <= 7 && item.isActive;
+    const isOverdue = item.daysUntil < 0 && item.isActive;
+    
+    return (
+      <TouchableOpacity 
+        style={styles.reminderCardContainer}
+        onPress={() => router.push(`/reminder-detail?id=${item.id}`)}
+        activeOpacity={0.9}
+      >
+        <Card variant={!item.isActive ? "subtle" : "elevated"} style={[
+          styles.reminderCard,
+          isOverdue && styles.overdueCard,
+          isUrgent && styles.urgentCard,
+          !item.isActive && styles.inactiveCard
+        ]}>
+          <View style={styles.cardHeader}>
+            <View style={styles.reminderIcon}>
+              <Ionicons 
+                name={REMINDER_TYPE_ICONS[item.type] as any} 
+                size={24} 
+                color={item.isActive ? theme.colors.primary.base : theme.colors.neutral.grey} 
+              />
+            </View>
+            
+            <View style={styles.reminderInfo}>
+              <ThemedText type="h6" color={item.isActive ? "neutral.charcoal" : "neutral.darkGrey"} style={styles.reminderTitle}>
+                {item.title}
+              </ThemedText>
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.reminderDescription}>
+                {item.description}
+              </ThemedText>
+            </View>
+            
+            <View style={styles.statusSection}>
+              {isOverdue && (
+                <View style={styles.overdueBadge}>
+                  <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
+                </View>
+              )}
+              {isUrgent && !isOverdue && (
+                <View style={styles.urgentBadge}>
+                  <Ionicons name="time" size={16} color={theme.colors.warning} />
+                </View>
+              )}
+              {!item.isActive && (
+                <View style={styles.inactiveBadge}>
+                  <Ionicons name="pause-circle" size={16} color={theme.colors.neutral.grey} />
+                </View>
+              )}
+            </View>
+          </View>
+          
+          <View style={styles.personSection}>
+            <Image source={{ uri: item.personImage }} style={styles.personImage} />
+            <View style={styles.personInfo}>
+              <ThemedText type="body2" color="neutral.charcoal" style={styles.personName}>
+                {item.personName}
+              </ThemedText>
+              <View style={styles.dateTimeContainer}>
+                <View style={styles.dateTime}>
+                  <Ionicons name="calendar-outline" size={14} color={theme.colors.neutral.darkGrey} />
+                  <ThemedText type="caption" color="neutral.darkGrey" style={styles.dateTimeText}>
+                    {new Date(item.date).toLocaleDateString()}
+                  </ThemedText>
+                </View>
+                <View style={styles.dateTime}>
+                  <Ionicons name="time-outline" size={14} color={theme.colors.neutral.darkGrey} />
+                  <ThemedText type="caption" color="neutral.darkGrey" style={styles.dateTimeText}>
+                    {item.time}
+                  </ThemedText>
+                </View>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.cardFooter}>
+            <View style={styles.daysContainer}>
+              {!item.isActive ? (
+                <ThemedText type="body2" color="neutral.grey">
+                  Inactive
+                </ThemedText>
+              ) : isOverdue ? (
+                <ThemedText type="body2" color="error">
+                  {Math.abs(item.daysUntil)} days overdue
+                </ThemedText>
+              ) : (
+                <ThemedText type="body2" color={isUrgent ? "warning" : "primary.base"}>
+                  {item.daysUntil === 0 ? 'Today' : `${item.daysUntil} days`}
+                </ThemedText>
+              )}
+            </View>
+            
+            <View style={styles.notificationBadges}>
+              {item.hasPushNotification && (
+                <View style={styles.pushBadge}>
+                  <Ionicons name="notifications" size={12} color={theme.colors.secondary.base} />
+                </View>
+              )}
+              {item.hasGoogleCalendar && (
+                <View style={styles.calendarBadge}>
+                  <Ionicons name="calendar" size={12} color={theme.colors.primary.base} />
+                </View>
+              )}
+            </View>
+            
+            <View style={styles.priorityBadge}>
+              <ThemedText type="caption" color={
+                item.priority === 'high' ? 'error' : 
+                item.priority === 'medium' ? 'warning' : 
+                'neutral.darkGrey'
+              }>
+                {item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}
+              </ThemedText>
+            </View>
+          </View>
+        </Card>
+      </TouchableOpacity>
+    );
   };
   
-  const renderReminderItem = ({ item }: { item: Reminder }) => (
+  const renderUpcomingItem = ({ item }: { item: typeof SAMPLE_REMINDERS[0] }) => (
     <TouchableOpacity 
-      style={[styles.reminderCard, item.isRead ? styles.readCard : null]} 
-      onPress={() => navigateToReminderDetail(item)}
+      style={styles.upcomingItem}
+      onPress={() => router.push(`/reminder-detail?id=${item.id}`)}
+      activeOpacity={0.8}
     >
-      <ThemedView style={styles.reminderCardContent}>
-        <ThemedView style={styles.reminderInfo}>
-          <ThemedView style={styles.reminderHeader}>
-            <ThemedText type="subtitle">{item.title}</ThemedText>
-            {!item.isRead && (
-              <ThemedView style={styles.unreadBadge} />
-            )}
-          </ThemedView>
-          
-          <ThemedText style={styles.personText}>For: {item.personName}</ThemedText>
-          
-          {item.description && (
-            <ThemedText style={styles.descriptionText}>{item.description}</ThemedText>
-          )}
-          
-          <ThemedView style={styles.reminderMeta}>
-            <ThemedText style={styles.dateText}>{formatDate(item.date)}</ThemedText>
-            <ThemedView 
-              style={[
-                styles.typeContainer, 
-                item.type === 'gift' ? styles.giftTypeContainer : styles.flowersTypeContainer
-              ]}
-            >
-              <ThemedText 
-                style={[
-                  styles.typeText,
-                  item.type === 'gift' ? styles.giftTypeText : styles.flowersTypeText
-                ]}
-              >
-                {item.type === 'gift' ? 'Gift' : 'Flowers'}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+      <LinearGradient
+        colors={[theme.colors.primary.light, theme.colors.primary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.upcomingGradient}
+      >
+        <View style={styles.upcomingContent}>
+          <View style={styles.upcomingIcon}>
+            <Ionicons 
+              name={REMINDER_TYPE_ICONS[item.type] as any} 
+              size={20} 
+              color={theme.colors.neutral.white} 
+            />
+          </View>
+          <View style={styles.upcomingInfo}>
+            <ThemedText type="h6" color="neutral.white" numberOfLines={1}>
+              {item.title}
+            </ThemedText>
+            <ThemedText type="body2" color="neutral.lightGrey" numberOfLines={1}>
+              {item.personName}
+            </ThemedText>
+          </View>
+          <View style={styles.upcomingDays}>
+            <ThemedText type="h4" color="neutral.white">
+              {item.daysUntil}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.lightGrey">
+              days
+            </ThemedText>
+          </View>
+        </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
-
+  
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#CED4DA', dark: '#343A40' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.container}>
-                 <ThemedView style={styles.header}>
-           <ThemedText type="title">Reminders</ThemedText>
-           <TouchableOpacity 
-             style={styles.settingsButton} 
-             onPress={() => router.push('/reminder-settings')}
-             accessibilityLabel="Notification Settings"
-           >
-             <ThemedText style={styles.settingsButtonText}>⚙️</ThemedText>
-           </TouchableOpacity>
-         </ThemedView>
-         
-         <TouchableOpacity 
-           style={styles.notificationSettingsButton}
-           onPress={() => router.push('/reminder-settings')}
-         >
-           <ThemedText style={styles.notificationSettingsText}>
-             Notification Preferences (Push & Calendar)
-           </ThemedText>
-           <ThemedText style={styles.arrowIcon}>›</ThemedText>
-         </TouchableOpacity>
-        
-        <ThemedView style={styles.filtersContainer}>
+    <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+      {/* Header */}
+      <LinearGradient
+        colors={[theme.colors.primary.base, theme.colors.secondary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <View>
+            <ThemedText type="h1" color="neutral.white" style={styles.headerTitle}>
+              Reminders
+            </ThemedText>
+            <ThemedText type="body1" color="neutral.lightGrey" style={styles.headerSubtitle}>
+              Stay on top of important dates and tasks
+            </ThemedText>
+          </View>
           <TouchableOpacity 
-            style={[styles.filterButton, filter === 'all' ? styles.filterButtonActive : null]}
-            onPress={() => setFilter('all')}
+            style={styles.settingsButton}
+            onPress={() => router.push('/reminder-settings')}
           >
-            <ThemedText style={filter === 'all' ? styles.filterTextActive : styles.filterText}>All</ThemedText>
+            <Ionicons name="settings" size={24} color={theme.colors.neutral.white} />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterButton, filter === 'unread' ? styles.filterButtonActive : null]}
-            onPress={() => setFilter('unread')}
-          >
-            <ThemedText style={filter === 'unread' ? styles.filterTextActive : styles.filterText}>Unread</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterButton, filter === 'gift' ? styles.filterButtonActive : null]}
-            onPress={() => setFilter('gift')}
-          >
-            <ThemedText style={filter === 'gift' ? styles.filterTextActive : styles.filterText}>Gifts</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterButton, filter === 'flowers' ? styles.filterButtonActive : null]}
-            onPress={() => setFilter('flowers')}
-          >
-            <ThemedText style={filter === 'flowers' ? styles.filterTextActive : styles.filterText}>Flowers</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-        
-        {filteredReminders.length > 0 ? (
+        </View>
+      </LinearGradient>
+      
+      {/* Stats Cards */}
+      <View style={styles.statsSection}>
+        <View style={styles.statsRow}>
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="primary.base" style={styles.statValue}>
+              {activeCount}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Active
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="warning" style={styles.statValue}>
+              {urgentCount}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Urgent
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="secondary.base" style={styles.statValue}>
+              {upcomingReminders.length}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              This Week
+            </ThemedText>
+          </Card>
+        </View>
+      </View>
+      
+      {/* Upcoming Section */}
+      {upcomingReminders.length > 0 && (
+        <View style={styles.upcomingSection}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="h4" color="neutral.charcoal">
+              Next 7 Days
+            </ThemedText>
+            <TouchableOpacity>
+              <ThemedText type="body2" color="primary.base">
+                View All
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
           <FlatList
-            data={filteredReminders}
-            renderItem={renderReminderItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContainer}
-            scrollEnabled={false} // Disable scrolling since it's already in ParallaxScrollView
+            data={upcomingReminders}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={renderUpcomingItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.upcomingList}
           />
-        ) : (
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText>No reminders found</ThemedText>
-          </ThemedView>
-        )}
-      </ThemedView>
-    </ParallaxScrollView>
+        </View>
+      )}
+      
+      {/* Filter Buttons */}
+      <View style={styles.filtersSection}>
+        <FlatList
+          data={FILTER_OPTIONS}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                selectedFilter === item.key && styles.filterButtonActive
+              ]}
+              onPress={() => setSelectedFilter(item.key)}
+            >
+              <Ionicons 
+                name={item.icon as any} 
+                size={16} 
+                color={selectedFilter === item.key ? theme.colors.neutral.white : theme.colors.neutral.charcoal} 
+              />
+              <ThemedText 
+                type="caption" 
+                color={selectedFilter === item.key ? "neutral.white" : "neutral.charcoal"}
+                style={styles.filterText}
+              >
+                {item.label}
+              </ThemedText>
+              <View style={[
+                styles.filterCount,
+                selectedFilter === item.key && styles.filterCountActive
+              ]}>
+                <ThemedText 
+                  type="caption" 
+                  color={selectedFilter === item.key ? "primary.base" : "neutral.white"}
+                  style={styles.filterCountText}
+                >
+                  {item.count}
+                </ThemedText>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={styles.filtersList}
+        />
+      </View>
+      
+      {/* Reminders List */}
+      <View style={styles.remindersSection}>
+        <FlatList
+          data={filteredReminders}
+          renderItem={renderReminderCard}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.remindersList}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="notifications-outline" size={48} color={theme.colors.neutral.grey} />
+              <ThemedText type="h5" color="neutral.darkGrey" style={styles.emptyTitle}>
+                No reminders found
+              </ThemedText>
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.emptySubtitle}>
+                Set up reminders to never miss important dates
+              </ThemedText>
+              <EnhancedButton
+                title="Add Reminder"
+                variant="primary"
+                onPress={() => router.push('/add-reminder')}
+                style={styles.emptyButton}
+              />
+            </View>
+          }
+        />
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  headerSubtitle: {
+    opacity: 0.9,
+  },
+  settingsButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statsSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    flex: 1,
+    marginHorizontal: theme.spacing.xxs,
+    alignItems: 'center',
+    padding: theme.spacing.sm,
+  },
+  statValue: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  upcomingSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.md,
   },
-  settingsButton: {
+  upcomingList: {
+    paddingBottom: theme.spacing.sm,
+  },
+  upcomingItem: {
+    width: 240,
+    marginRight: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    overflow: 'hidden',
+  },
+  upcomingGradient: {
+    padding: theme.spacing.md,
+  },
+  upcomingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  upcomingIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: theme.spacing.sm,
   },
-  settingsButtonText: {
-    fontSize: 20,
+  upcomingInfo: {
+    flex: 1,
+    marginRight: theme.spacing.sm,
   },
-  notificationSettingsButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  upcomingDays: {
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E9ECEF',
   },
-  notificationSettingsText: {
-    fontSize: 14,
-    color: '#343A40',
+  filtersSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
   },
-  arrowIcon: {
-    fontSize: 20,
-    color: '#6C757D',
-  },
-  filtersContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 8,
+  filtersList: {
+    paddingBottom: theme.spacing.sm,
   },
   filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#F8F9FA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    marginRight: theme.spacing.sm,
   },
   filterButtonActive: {
-    backgroundColor: '#6C757D',
+    backgroundColor: theme.colors.primary.base,
   },
   filterText: {
-    fontSize: 14,
-    color: '#6C757D',
+    marginLeft: theme.spacing.xs,
+    fontWeight: '500',
   },
-  filterTextActive: {
-    fontSize: 14,
-    color: 'white',
-  },
-  listContainer: {
-    gap: 16,
-  },
-  emptyContainer: {
-    flex: 1,
+  filterCount: {
+    marginLeft: theme.spacing.xs,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: theme.colors.neutral.darkGrey,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
+  },
+  filterCountActive: {
+    backgroundColor: theme.colors.neutral.white,
+  },
+  filterCountText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  remindersSection: {
+    flex: 1,
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  remindersList: {
+    paddingBottom: theme.spacing.xl,
+  },
+  reminderCardContainer: {
+    marginBottom: theme.spacing.md,
   },
   reminderCard: {
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
+    padding: theme.spacing.md,
+  },
+  overdueCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#17A2B8',
+    borderLeftColor: theme.colors.error,
   },
-  readCard: {
+  urgentCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.warning,
+  },
+  inactiveCard: {
     opacity: 0.7,
-    borderLeftColor: '#CED4DA',
   },
-  reminderCardContent: {
-    padding: 16,
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing.sm,
+  },
+  reminderIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.primary.lighter,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.sm,
   },
   reminderInfo: {
-    gap: 4,
+    flex: 1,
+    marginRight: theme.spacing.sm,
   },
-  reminderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  reminderTitle: {
+    fontWeight: '600',
+    marginBottom: theme.spacing.xxs,
+  },
+  reminderDescription: {
+    marginBottom: theme.spacing.xs,
+  },
+  statusSection: {
+    alignItems: 'flex-end',
+  },
+  overdueBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.error + '20',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  unreadBadge: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#DC3545',
+  urgentBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.warning + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  personText: {
-    fontSize: 14,
+  inactiveBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  personSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  personImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: theme.spacing.sm,
+  },
+  personInfo: {
+    flex: 1,
+  },
+  personName: {
     fontWeight: '500',
-    color: '#343A40',
+    marginBottom: theme.spacing.xxs,
   },
-  descriptionText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
+  dateTimeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  reminderMeta: {
+  dateTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateTimeText: {
+    marginLeft: theme.spacing.xxs,
+  },
+  cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
   },
-  dateText: {
-    fontSize: 14,
-    color: '#6C757D',
+  daysContainer: {
+    flex: 1,
   },
-  typeContainer: {
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+  notificationBadges: {
+    flexDirection: 'row',
+    marginHorizontal: theme.spacing.sm,
   },
-  giftTypeContainer: {
-    backgroundColor: '#8FDC9F',
+  pushBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: theme.colors.secondary.lighter,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.xxs,
   },
-  flowersTypeContainer: {
-    backgroundColor: '#F8C8DC',
+  calendarBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: theme.colors.primary.lighter,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  typeText: {
-    fontSize: 12,
+  priorityBadge: {
+    backgroundColor: theme.colors.neutral.lightGrey,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.full,
   },
-  giftTypeText: {
-    color: '#2A744A',
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xl,
   },
-  flowersTypeText: {
-    color: '#803D52',
+  emptyTitle: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    opacity: 0.7,
+  emptySubtitle: {
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  emptyButton: {
+    paddingHorizontal: theme.spacing.lg,
   },
 });

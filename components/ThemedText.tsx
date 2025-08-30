@@ -1,6 +1,6 @@
 import { getTypography } from '@/constants/Theme';
 import { useTheme } from '@/context/ThemeContext';
-import { Text, type TextProps } from 'react-native';
+import { Text, type TextProps, type TextStyle } from 'react-native';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -58,35 +58,25 @@ function mapLegacyTypeToDesignSystem(type: ThemedTextProps['type']): string {
   }
 }
 
-// Helper function to get the appropriate font family based on weight
-function getFontFamily(fontWeight: string | number): string {
-  if (typeof fontWeight === 'string') {
-    switch (fontWeight) {
-      case 'bold':
-      case '700':
-        return 'Satoshi-Bold';
-      case '800':
-      case '900':
-        return 'Satoshi-Black';
-      case '600':
-        return 'Satoshi-SemiBold';
-      case '500':
-        return 'Satoshi-Medium';
-      default:
-        return 'Satoshi-Regular';
-    }
-  } else {
-    // Numeric font weights
-    if (fontWeight >= 800) {
-      return 'Satoshi-Black';
-    } else if (fontWeight >= 700) {
-      return 'Satoshi-Bold';
-    } else if (fontWeight >= 600) {
-      return 'Satoshi-SemiBold';
-    } else if (fontWeight >= 500) {
-      return 'Satoshi-Medium';
-    } else {
-      return 'Satoshi-Regular';
-    }
+// Helper function to get font family based on weight
+function getFontFamily(weight: TextStyle['fontWeight']): string {
+  // Use system fonts since we're not loading Satoshi
+  switch (weight) {
+    case '900':
+    case '800':
+      return 'System';
+    case '700':
+      return 'System';
+    case '600':
+      return 'System';
+    case '500':
+      return 'System';
+    case '400':
+    case '300':
+    case '200':
+    case '100':
+    case 'normal':
+    default:
+      return 'System';
   }
 }

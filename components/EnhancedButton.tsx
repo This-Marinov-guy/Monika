@@ -131,7 +131,7 @@ export function EnhancedButton({
             {
               color: textColor,
               fontSize: buttonSizeStyle.fontSize,
-              fontFamily: 'Satoshi-SemiBold',
+              fontFamily: 'System',
               textAlign: 'center',
             },
             textStyle,

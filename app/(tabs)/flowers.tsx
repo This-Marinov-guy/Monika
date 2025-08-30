@@ -1,391 +1,626 @@
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Card } from '@/components/Card';
+import { EnhancedButton } from '@/components/EnhancedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Person } from '@/models/Person';
-import { daysUntil, formatDate, getValentinesDayDate, getWomensDayDate } from '@/utils/dateUtils';
+import { theme } from '@/constants/Theme';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-// Sample data for demonstration - using the same data from index.tsx
-const SAMPLE_PEOPLE: Person[] = [
+// Sample flower schedule data
+const SAMPLE_FLOWER_SCHEDULES = [
   {
     id: '1',
-    name: 'Sarah Johnson',
-    label: 'Girlfriend',
-    image: 'https://picsum.photos/id/64/200',
-    preferences: ['Books', 'Hiking', 'Photography'],
-    importantDates: [
-      {
-        id: '101',
-        type: 'birthday',
-        date: '1995-05-15',
-        reminderDays: [1, 7, 30]
-      },
-      {
-        id: '102',
-        type: 'anniversary',
-        date: '2022-09-22',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '201',
-        name: 'DSLR Camera',
-        description: 'Canon EOS Rebel T7',
-        price: 449.99,
-        occasion: 'birthday'
-      },
-      {
-        id: '202',
-        name: 'Hiking Boots',
-        description: 'Waterproof trail boots',
-        price: 120,
-        occasion: 'anniversary'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: true,
-      enableBirthday: true,
-      enableAnniversary: true,
-      randomDates: 2,
-      reminderDays: [1, 3]
-    }
+    personId: '1',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    nextDelivery: '2024-03-08',
+    daysUntil: 5,
+    occasion: "Women's Day",
+    flowerType: 'Red Roses',
+    isRecurring: true,
+    estimatedCost: 45,
+    status: 'scheduled'
   },
   {
     id: '2',
-    name: 'Mom',
-    label: 'Family',
-    image: 'https://picsum.photos/id/76/200',
-    preferences: ['Gardening', 'Cooking', 'Reading'],
-    importantDates: [
-      {
-        id: '103',
-        type: 'birthday',
-        date: '1965-11-03',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '203',
-        name: 'Gardening Kit',
-        description: 'Premium gardening tools set',
-        price: 89.99,
-        occasion: 'birthday'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: false,
-      enableBirthday: true,
-      enableAnniversary: false,
-      randomDates: 1,
-      reminderDays: [1, 3]
-    }
+    personId: '3',
+    personName: 'Sarah Williams',
+    personImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    nextDelivery: '2024-03-18',
+    daysUntil: 15,
+    occasion: 'Birthday',
+    flowerType: 'Mixed Bouquet',
+    isRecurring: true,
+    estimatedCost: 65,
+    status: 'scheduled'
+  },
+  {
+    id: '3',
+    personId: '1',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    nextDelivery: '2024-05-12',
+    daysUntil: 69,
+    occasion: 'Birthday',
+    flowerType: 'Pink Tulips',
+    isRecurring: true,
+    estimatedCost: 55,
+    status: 'scheduled'
+  },
+  {
+    id: '4',
+    personId: '5',
+    personName: 'Lisa Rodriguez',
+    personImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    nextDelivery: '2024-06-15',
+    daysUntil: 103,
+    occasion: 'Anniversary',
+    flowerType: 'White Lilies',
+    isRecurring: true,
+    estimatedCost: 75,
+    status: 'scheduled'
+  },
+  {
+    id: '5',
+    personId: '2',
+    personName: 'Michael Chen',
+    personImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    nextDelivery: '2024-02-28',
+    daysUntil: -2,
+    occasion: 'Random Surprise',
+    flowerType: 'Sunflowers',
+    isRecurring: false,
+    estimatedCost: 35,
+    status: 'delivered'
   }
 ];
 
-// For demonstration purposes, let's create some upcoming flower dates
-const CURRENT_YEAR = new Date().getFullYear();
-
-type FlowerDate = {
-  id: string;
-  personId: string;
-  personName: string;
-  personImage?: string;
-  date: string;
-  occasion: string;
-};
+const FILTER_OPTIONS = [
+  { key: 'all', label: 'All', icon: 'flower' },
+  { key: 'upcoming', label: 'Upcoming', icon: 'time' },
+  { key: 'recurring', label: 'Recurring', icon: 'repeat' },
+  { key: 'delivered', label: 'Delivered', icon: 'checkmark-circle' }
+];
 
 export default function FlowersScreen() {
-  const [people] = useState<Person[]>(SAMPLE_PEOPLE);
+  const [flowerSchedules] = useState(SAMPLE_FLOWER_SCHEDULES);
+  const [selectedFilter, setSelectedFilter] = useState('all');
   
-  // Generate flower dates for each person
-  const flowerDates: FlowerDate[] = useMemo(() => {
-    const dates: FlowerDate[] = [];
-    const today = new Date();
-    
-    people.forEach(person => {
-      if (!person.flowerSchedule) return;
-      
-      // Women's Day
-      if (person.flowerSchedule.enableWomensDay) {
-        const womensDayDate = getWomensDayDate(CURRENT_YEAR);
-        // If this year's Women's Day has passed, use next year
-        const finalDate = new Date(womensDayDate) < today 
-          ? getWomensDayDate(CURRENT_YEAR + 1) 
-          : womensDayDate;
-        
-        dates.push({
-          id: `wd-${person.id}`,
-          personId: person.id,
-          personName: person.name,
-          personImage: person.image,
-          date: finalDate,
-          occasion: "Women's Day"
-        });
-      }
-      
-      // Valentine's Day
-      if (person.flowerSchedule.enableValentinesDay) {
-        const valentinesDate = getValentinesDayDate(CURRENT_YEAR);
-        // If this year's Valentine's Day has passed, use next year
-        const finalDate = new Date(valentinesDate) < today 
-          ? getValentinesDayDate(CURRENT_YEAR + 1) 
-          : valentinesDate;
-        
-        dates.push({
-          id: `vd-${person.id}`,
-          personId: person.id,
-          personName: person.name,
-          personImage: person.image,
-          date: finalDate,
-          occasion: "Valentine's Day"
-        });
-      }
-      
-      // Birthday
-      if (person.flowerSchedule.enableBirthday) {
-        const birthdayDate = person.importantDates.find(date => date.type === 'birthday');
-        if (birthdayDate) {
-          // Extract month and day from the birthdate
-          const birthDate = new Date(birthdayDate.date);
-          const month = birthDate.getMonth();
-          const day = birthDate.getDate();
-          
-          // Create date for this year's birthday
-          let thisYearBirthday = new Date(CURRENT_YEAR, month, day);
-          // If birthday has passed this year, use next year's birthday
-          if (thisYearBirthday < today) {
-            thisYearBirthday = new Date(CURRENT_YEAR + 1, month, day);
-          }
-          
-          dates.push({
-            id: `bd-${person.id}`,
-            personId: person.id,
-            personName: person.name,
-            personImage: person.image,
-            date: thisYearBirthday.toISOString().split('T')[0],
-            occasion: "Birthday"
-          });
-        }
-      }
-      
-      // Anniversary
-      if (person.flowerSchedule.enableAnniversary) {
-        const anniversaryDate = person.importantDates.find(date => date.type === 'anniversary');
-        if (anniversaryDate) {
-          // Extract month and day from the anniversary date
-          const annDate = new Date(anniversaryDate.date);
-          const month = annDate.getMonth();
-          const day = annDate.getDate();
-          
-          // Create date for this year's anniversary
-          let thisYearAnniversary = new Date(CURRENT_YEAR, month, day);
-          // If anniversary has passed this year, use next year's anniversary
-          if (thisYearAnniversary < today) {
-            thisYearAnniversary = new Date(CURRENT_YEAR + 1, month, day);
-          }
-          
-          dates.push({
-            id: `an-${person.id}`,
-            personId: person.id,
-            personName: person.name,
-            personImage: person.image,
-            date: thisYearAnniversary.toISOString().split('T')[0],
-            occasion: "Anniversary"
-          });
-        }
-      }
-      
-      // Random dates would be generated here using generateRandomFlowerDates utility
-      // For demo purposes, we'll just add one random date
-      if (person.flowerSchedule.randomDates > 0) {
-        const randomDate = new Date();
-        randomDate.setDate(randomDate.getDate() + Math.floor(Math.random() * 30) + 7); // Random date 7-37 days from now
-        
-        dates.push({
-          id: `rd-${person.id}`,
-          personId: person.id,
-          personName: person.name,
-          personImage: person.image,
-          date: randomDate.toISOString().split('T')[0],
-          occasion: "Just Because"
-        });
-      }
-    });
-    
-    // Sort by date (closest first)
-    return dates.sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
-  }, [people]);
-
-  const navigateToFlowerDetail = (flower: FlowerDate) => {
-    router.push({
-      pathname: `/flower-detail/${flower.id}`,
-      params: { personId: flower.personId }
-    });
-  };
+  const filteredSchedules = flowerSchedules.filter(schedule => {
+    switch (selectedFilter) {
+      case 'upcoming':
+        return schedule.daysUntil >= 0 && schedule.status === 'scheduled';
+      case 'recurring':
+        return schedule.isRecurring;
+      case 'delivered':
+        return schedule.status === 'delivered';
+      default:
+        return true;
+    }
+  });
   
-  const renderFlowerDateItem = ({ item }: { item: FlowerDate }) => {
-    const daysLeft = daysUntil(item.date);
+  const upcomingSchedules = flowerSchedules.filter(s => s.daysUntil >= 0 && s.daysUntil <= 30).sort((a, b) => a.daysUntil - b.daysUntil);
+  const totalCost = filteredSchedules.reduce((sum, schedule) => sum + schedule.estimatedCost, 0);
+  const scheduledCount = flowerSchedules.filter(s => s.status === 'scheduled').length;
+  
+  const renderFlowerCard = ({ item }: { item: typeof SAMPLE_FLOWER_SCHEDULES[0] }) => {
+    const isOverdue = item.daysUntil < 0 && item.status === 'scheduled';
+    const isUrgent = item.daysUntil >= 0 && item.daysUntil <= 7 && item.status === 'scheduled';
     
     return (
       <TouchableOpacity 
-        style={styles.flowerCard} 
-        onPress={() => navigateToFlowerDetail(item)}
+        style={styles.flowerCardContainer}
+        onPress={() => router.push(`/flower-settings/${item.personId}`)}
+        activeOpacity={0.9}
       >
-        <ThemedView style={styles.flowerCardContent}>
-          {item.personImage && (
-            <Image 
-              source={{ uri: item.personImage }}
-              style={styles.personImage}
-              contentFit="cover"
-            />
-          )}
-          <ThemedView style={styles.flowerInfo}>
-            <ThemedText type="subtitle">{item.personName}</ThemedText>
-            <ThemedView style={styles.occasionContainer}>
-              <ThemedText style={styles.occasionText}>{item.occasion}</ThemedText>
-            </ThemedView>
-            <ThemedText style={styles.dateText}>{formatDate(item.date)}</ThemedText>
-            <ThemedText 
-              style={[styles.daysText, daysLeft <= 3 ? styles.urgentText : null]}
-            >
-              {daysLeft === 0 ? 'Today!' : daysLeft === 1 ? 'Tomorrow!' : `${daysLeft} days left`}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
+        <Card variant={item.status === 'delivered' ? "subtle" : "elevated"} style={[
+          styles.flowerCard,
+          isOverdue && styles.overdueCard,
+          isUrgent && styles.urgentCard
+        ]}>
+          <View style={styles.cardHeader}>
+            <View style={styles.personSection}>
+              <Image source={{ uri: item.personImage }} style={styles.personImage} />
+              <View style={styles.personInfo}>
+                <ThemedText type="h6" color="neutral.charcoal" style={styles.personName}>
+                  {item.personName}
+                </ThemedText>
+                <ThemedText type="body2" color="neutral.darkGrey">
+                  {item.occasion}
+                </ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.statusSection}>
+              {item.status === 'delivered' && (
+                <View style={styles.deliveredBadge}>
+                  <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
+                </View>
+              )}
+              {isOverdue && (
+                <View style={styles.overdueBadge}>
+                  <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
+                </View>
+              )}
+              {isUrgent && (
+                <View style={styles.urgentBadge}>
+                  <Ionicons name="time" size={16} color={theme.colors.warning} />
+                </View>
+              )}
+            </View>
+          </View>
+          
+          <View style={styles.flowerDetails}>
+            <View style={styles.flowerTypeContainer}>
+              <Ionicons name="flower" size={20} color={theme.colors.secondary.base} />
+              <ThemedText type="body1" color="neutral.charcoal" style={styles.flowerType}>
+                {item.flowerType}
+              </ThemedText>
+            </View>
+            
+            <View style={styles.flowerMeta}>
+              <View style={styles.metaItem}>
+                <Ionicons name="calendar-outline" size={14} color={theme.colors.neutral.darkGrey} />
+                <ThemedText type="caption" color="neutral.darkGrey" style={styles.metaText}>
+                  {new Date(item.nextDelivery).toLocaleDateString()}
+                </ThemedText>
+              </View>
+              
+              <View style={styles.metaItem}>
+                <Ionicons name="cash-outline" size={14} color={theme.colors.neutral.darkGrey} />
+                <ThemedText type="caption" color="neutral.darkGrey" style={styles.metaText}>
+                  ${item.estimatedCost}
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.cardFooter}>
+            <View style={styles.daysContainer}>
+              {item.status === 'delivered' ? (
+                <ThemedText type="body2" color="success">
+                  Delivered
+                </ThemedText>
+              ) : isOverdue ? (
+                <ThemedText type="body2" color="error">
+                  {Math.abs(item.daysUntil)} days overdue
+                </ThemedText>
+              ) : (
+                <ThemedText type="body2" color={isUrgent ? "warning" : "primary.base"}>
+                  {item.daysUntil === 0 ? 'Today' : `${item.daysUntil} days`}
+                </ThemedText>
+              )}
+            </View>
+            
+            {item.isRecurring && (
+              <View style={styles.recurringBadge}>
+                <Ionicons name="repeat" size={12} color={theme.colors.neutral.darkGrey} />
+                <ThemedText type="caption" color="neutral.darkGrey" style={styles.badgeText}>
+                  Recurring
+                </ThemedText>
+              </View>
+            )}
+          </View>
+        </Card>
       </TouchableOpacity>
     );
   };
-
+  
+  const renderUpcomingItem = ({ item }: { item: typeof SAMPLE_FLOWER_SCHEDULES[0] }) => (
+    <TouchableOpacity 
+      style={styles.upcomingItem}
+      onPress={() => router.push(`/flower-settings/${item.personId}`)}
+      activeOpacity={0.8}
+    >
+      <LinearGradient
+        colors={[theme.colors.secondary.light, theme.colors.secondary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.upcomingGradient}
+      >
+        <View style={styles.upcomingContent}>
+          <View style={styles.upcomingInfo}>
+            <ThemedText type="h6" color="neutral.white">
+              {item.personName}
+            </ThemedText>
+            <ThemedText type="body2" color="neutral.lightGrey">
+              {item.flowerType} • {item.occasion}
+            </ThemedText>
+          </View>
+          <View style={styles.upcomingDays}>
+            <ThemedText type="h4" color="neutral.white">
+              {item.daysUntil}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.lightGrey">
+              days
+            </ThemedText>
+          </View>
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+  
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#F8C8DC', dark: '#803D52' }} // Light pink for flowers
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.header}>
-          <ThemedText type="title">Flower Schedule</ThemedText>
-          <TouchableOpacity style={styles.settingsButton} onPress={() => router.push('/flower-settings')}>
-            <ThemedText style={styles.settingsButtonText}>⚙️</ThemedText>
+    <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+      {/* Header */}
+      <LinearGradient
+        colors={[theme.colors.secondary.base, theme.colors.primary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <View>
+            <ThemedText type="h1" color="neutral.white" style={styles.headerTitle}>
+              Flowers
+            </ThemedText>
+            <ThemedText type="body1" color="neutral.lightGrey" style={styles.headerSubtitle}>
+              Schedule and track flower deliveries
+            </ThemedText>
+          </View>
+          <TouchableOpacity 
+            style={styles.addScheduleButton}
+            onPress={() => router.push('/add-flower-schedule')}
+          >
+            <Ionicons name="add" size={24} color={theme.colors.neutral.white} />
           </TouchableOpacity>
-        </ThemedView>
-        
-        {flowerDates.length > 0 ? (
+        </View>
+      </LinearGradient>
+      
+      {/* Stats Cards */}
+      <View style={styles.statsSection}>
+        <View style={styles.statsRow}>
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="secondary.base" style={styles.statValue}>
+              {scheduledCount}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Scheduled
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="primary.base" style={styles.statValue}>
+              ${totalCost}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Monthly Cost
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="warning" style={styles.statValue}>
+              {upcomingSchedules.length}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              This Month
+            </ThemedText>
+          </Card>
+        </View>
+      </View>
+      
+      {/* Upcoming Section */}
+      {upcomingSchedules.length > 0 && (
+        <View style={styles.upcomingSection}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="h4" color="neutral.charcoal">
+              Next 30 Days
+            </ThemedText>
+            <TouchableOpacity>
+              <ThemedText type="body2" color="secondary.base">
+                View Calendar
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
           <FlatList
-            data={flowerDates}
-            renderItem={renderFlowerDateItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContainer}
-            scrollEnabled={false} // Disable scrolling since it's already in ParallaxScrollView
+            data={upcomingSchedules}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={renderUpcomingItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.upcomingList}
           />
-        ) : (
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText>No upcoming flower dates scheduled</ThemedText>
-          </ThemedView>
-        )}
-      </ThemedView>
-    </ParallaxScrollView>
+        </View>
+      )}
+      
+      {/* Filter Buttons */}
+      <View style={styles.filtersSection}>
+        <FlatList
+          data={FILTER_OPTIONS}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                selectedFilter === item.key && styles.filterButtonActive
+              ]}
+              onPress={() => setSelectedFilter(item.key)}
+            >
+              <Ionicons 
+                name={item.icon as any} 
+                size={16} 
+                color={selectedFilter === item.key ? theme.colors.neutral.white : theme.colors.neutral.charcoal} 
+              />
+              <ThemedText 
+                type="caption" 
+                color={selectedFilter === item.key ? "neutral.white" : "neutral.charcoal"}
+                style={styles.filterText}
+              >
+                {item.label}
+              </ThemedText>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={styles.filtersList}
+        />
+      </View>
+      
+      {/* Flower Schedules */}
+      <View style={styles.schedulesSection}>
+        <FlatList
+          data={filteredSchedules}
+          renderItem={renderFlowerCard}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.schedulesList}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="flower-outline" size={48} color={theme.colors.neutral.grey} />
+              <ThemedText type="h5" color="neutral.darkGrey" style={styles.emptyTitle}>
+                No flower schedules found
+              </ThemedText>
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.emptySubtitle}>
+                Set up automatic flower deliveries for your loved ones
+              </ThemedText>
+              <EnhancedButton
+                title="Add Schedule"
+                variant="primary"
+                onPress={() => router.push('/add-flower-schedule')}
+                style={styles.emptyButton}
+              />
+            </View>
+          }
+        />
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  headerSubtitle: {
+    opacity: 0.9,
+  },
+  addScheduleButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statsSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    flex: 1,
+    marginHorizontal: theme.spacing.xxs,
+    alignItems: 'center',
+    padding: theme.spacing.sm,
+  },
+  statValue: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  upcomingSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
-  settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
-    justifyContent: 'center',
-    alignItems: 'center',
+  upcomingList: {
+    paddingBottom: theme.spacing.sm,
   },
-  settingsButtonText: {
-    fontSize: 20,
-  },
-  listContainer: {
-    gap: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  flowerCard: {
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  upcomingItem: {
+    width: 220,
+    marginRight: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
     overflow: 'hidden',
   },
-  flowerCardContent: {
+  upcomingGradient: {
+    padding: theme.spacing.md,
+  },
+  upcomingContent: {
     flexDirection: 'row',
-    padding: 0,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  upcomingInfo: {
+    flex: 1,
+  },
+  upcomingDays: {
+    alignItems: 'center',
+  },
+  filtersSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  filtersList: {
+    paddingBottom: theme.spacing.sm,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    marginRight: theme.spacing.sm,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.colors.secondary.base,
+  },
+  filterText: {
+    marginLeft: theme.spacing.xs,
+    fontWeight: '500',
+  },
+  schedulesSection: {
+    flex: 1,
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  schedulesList: {
+    paddingBottom: theme.spacing.xl,
+  },
+  flowerCardContainer: {
+    marginBottom: theme.spacing.md,
+  },
+  flowerCard: {
+    padding: theme.spacing.md,
+  },
+  overdueCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.error,
+  },
+  urgentCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.warning,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing.sm,
+  },
+  personSection: {
+    flexDirection: 'row',
+    flex: 1,
   },
   personImage: {
-    width: 80,
-    height: 100,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: theme.spacing.sm,
   },
-  flowerInfo: {
+  personInfo: {
     flex: 1,
-    padding: 12,
     justifyContent: 'center',
   },
-  occasionContainer: {
-    backgroundColor: '#F8C8DC', // Light pink
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginVertical: 4,
-  },
-  occasionText: {
-    fontSize: 12,
-    color: '#803D52', // Darker pink
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#343A40',
-  },
-  daysText: {
-    fontSize: 14,
+  personName: {
     fontWeight: '600',
-    color: '#4BB675',
-    marginTop: 4,
+    marginBottom: theme.spacing.xxs,
   },
-  urgentText: {
-    color: '#DC3545',
+  statusSection: {
+    alignItems: 'flex-end',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    opacity: 0.7,
+  deliveredBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.success + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overdueBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.error + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  urgentBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.warning + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flowerDetails: {
+    marginBottom: theme.spacing.sm,
+  },
+  flowerTypeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  flowerType: {
+    marginLeft: theme.spacing.xs,
+    fontWeight: '500',
+  },
+  flowerMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metaText: {
+    marginLeft: theme.spacing.xxs,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  daysContainer: {
+    flex: 1,
+  },
+  recurringBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.neutral.lightGrey,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.full,
+  },
+  badgeText: {
+    marginLeft: theme.spacing.xxs,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xl,
+  },
+  emptyTitle: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  emptyButton: {
+    paddingHorizontal: theme.spacing.lg,
   },
 });

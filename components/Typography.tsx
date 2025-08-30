@@ -206,23 +206,24 @@ function getVariantStyle(variant: TypographyVariant): TextStyle {
 
 // Helper function to get font family based on weight
 function getFontFamily(weight: TextStyle['fontWeight']): string {
+  // Use system fonts since we're not loading Satoshi
   switch (weight) {
     case '900':
     case '800':
-      return 'Satoshi-Black';
+      return 'System';
     case '700':
-      return 'Satoshi-Bold';
+      return 'System';
     case '600':
-      return 'Satoshi-SemiBold';
+      return 'System';
     case '500':
-      return 'Satoshi-Medium';
+      return 'System';
     case '400':
     case '300':
     case '200':
     case '100':
     case 'normal':
     default:
-      return 'Satoshi-Regular';
+      return 'System';
   }
 }
 

@@ -1,3 +1,9 @@
+import { Card } from '@/components/Card';
+import DefaultProfileImage from '@/components/DefaultProfileImage';
+import { EnhancedButton } from '@/components/EnhancedButton';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { theme } from '@/constants/Theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useRef, useState } from 'react';
@@ -9,12 +15,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-
-import { Card } from '@/components/Card';
-import { EnhancedButton } from '@/components/EnhancedButton';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { theme } from '@/constants/Theme';
 
 // Sample data
 const SAMPLE_PEOPLE = [
@@ -165,6 +165,37 @@ export default function PersonDetailScreen() {
     );
   }
   
+  const renderHeaderImage = () => {
+    if (person.image) {
+      return (
+        <Animated.Image
+          style={[
+            styles.headerImage,
+            {
+              opacity: imageOpacity,
+              transform: [{ translateY: imageTranslate }],
+            },
+          ]}
+          source={{ uri: person.image }}
+        />
+      );
+    } else {
+      return (
+        <Animated.View
+          style={[
+            styles.headerImage,
+            {
+              opacity: imageOpacity,
+              transform: [{ translateY: imageTranslate }],
+            },
+          ]}
+        >
+          <DefaultProfileImage size={SCREEN_WIDTH} name={person.name} />
+        </Animated.View>
+      );
+    }
+  };
+  
   return (
     <>
       <Stack.Screen 
@@ -176,16 +207,7 @@ export default function PersonDetailScreen() {
       <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
         {/* Animated Header */}
         <Animated.View style={[styles.header, { height: headerHeight }]}>
-          <Animated.Image
-            style={[
-              styles.headerImage,
-              {
-                opacity: imageOpacity,
-                transform: [{ translateY: imageTranslate }],
-              },
-            ]}
-            source={person.image ? { uri: person.image } : require('@/assets/images/app/default-profile.png')}
-          />
+          {renderHeaderImage()}
           
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.7)']}

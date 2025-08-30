@@ -1,304 +1,561 @@
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Card } from '@/components/Card';
+import { EnhancedButton } from '@/components/EnhancedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { GiftIdea, Person } from '@/models/Person';
+import { theme } from '@/constants/Theme';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-// Sample data for demonstration - using the same data from index.tsx
-const SAMPLE_PEOPLE: Person[] = [
+// Sample gift data
+const SAMPLE_GIFTS = [
   {
     id: '1',
-    name: 'Sarah Johnson',
-    label: 'Girlfriend',
-    image: 'https://picsum.photos/id/64/200',
-    preferences: ['Books', 'Hiking', 'Photography'],
-    importantDates: [
-      {
-        id: '101',
-        type: 'birthday',
-        date: '1995-05-15',
-        reminderDays: [1, 7, 30]
-      },
-      {
-        id: '102',
-        type: 'anniversary',
-        date: '2022-09-22',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '201',
-        name: 'DSLR Camera',
-        description: 'Canon EOS Rebel T7',
-        price: 449.99,
-        occasion: 'birthday'
-      },
-      {
-        id: '202',
-        name: 'Hiking Boots',
-        description: 'Waterproof trail boots',
-        price: 120,
-        occasion: 'anniversary'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: true,
-      enableBirthday: true,
-      enableAnniversary: true,
-      randomDates: 2,
-      reminderDays: [1, 3]
-    }
+    name: 'Camera Lens',
+    description: 'Wide angle lens for DSLR camera',
+    price: 249.99,
+    occasion: 'Birthday',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: false,
+    isPurchased: false,
+    category: 'Electronics',
+    priority: 'high'
   },
   {
     id: '2',
-    name: 'Mom',
-    label: 'Family',
-    image: 'https://picsum.photos/id/76/200',
-    preferences: ['Gardening', 'Cooking', 'Reading'],
-    importantDates: [
-      {
-        id: '103',
-        type: 'birthday',
-        date: '1965-11-03',
-        reminderDays: [1, 7, 30]
-      }
-    ],
-    giftIdeas: [
-      {
-        id: '203',
-        name: 'Gardening Kit',
-        description: 'Premium gardening tools set',
-        price: 89.99,
-        occasion: 'birthday'
-      }
-    ],
-    flowerSchedule: {
-      enableWomensDay: true,
-      enableValentinesDay: false,
-      enableBirthday: true,
-      enableAnniversary: false,
-      randomDates: 1,
-      reminderDays: [1, 3]
-    }
+    name: 'Coffee Subscription',
+    description: 'Monthly specialty coffee delivery',
+    price: 89.99,
+    occasion: 'Anniversary',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: true,
+    isPurchased: false,
+    category: 'Food & Drink',
+    priority: 'medium'
+  },
+  {
+    id: '3',
+    name: 'Hiking Boots',
+    description: 'Waterproof boots for outdoor adventures',
+    price: 179.99,
+    occasion: 'Christmas',
+    personName: 'Emma Johnson',
+    personImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: true,
+    isPurchased: true,
+    category: 'Outdoor',
+    priority: 'low'
+  },
+  {
+    id: '4',
+    name: 'Gaming Headset',
+    description: 'Noise cancelling with surround sound',
+    price: 129.99,
+    occasion: 'Birthday',
+    personName: 'Michael Chen',
+    personImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: false,
+    isPurchased: false,
+    category: 'Electronics',
+    priority: 'high'
+  },
+  {
+    id: '5',
+    name: 'Cooking Class',
+    description: 'Italian cuisine masterclass',
+    price: 75,
+    occasion: 'Christmas',
+    personName: 'Michael Chen',
+    personImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: true,
+    isPurchased: false,
+    category: 'Experience',
+    priority: 'medium'
+  },
+  {
+    id: '6',
+    name: 'Gardening Set',
+    description: 'Premium tools with carrying case',
+    price: 89.99,
+    occasion: 'Birthday',
+    personName: 'Sarah Williams',
+    personImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
+    isAiSuggested: false,
+    isPurchased: false,
+    category: 'Home & Garden',
+    priority: 'medium'
   }
 ];
 
-type GiftWithPerson = GiftIdea & {
-  personId: string;
-  personName: string;
-};
+const CATEGORIES = ['All', 'Electronics', 'Food & Drink', 'Outdoor', 'Experience', 'Home & Garden', 'Fashion', 'Books'];
 
 export default function GiftsScreen() {
-  // Transform gift ideas to include the person they're for
-  const allGifts: GiftWithPerson[] = SAMPLE_PEOPLE.flatMap(person => 
-    person.giftIdeas.map(gift => ({
-      ...gift,
-      personId: person.id,
-      personName: person.name
-    }))
-  );
+  const [gifts] = useState(SAMPLE_GIFTS);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedFilter, setSelectedFilter] = useState('all'); // all, ai, purchased, unpurchased
   
-  const [gifts, setGifts] = useState<GiftWithPerson[]>(allGifts);
+  const filteredGifts = gifts.filter(gift => {
+    const categoryMatch = selectedCategory === 'All' || gift.category === selectedCategory;
+    const filterMatch = 
+      selectedFilter === 'all' ||
+      (selectedFilter === 'ai' && gift.isAiSuggested) ||
+      (selectedFilter === 'purchased' && gift.isPurchased) ||
+      (selectedFilter === 'unpurchased' && !gift.isPurchased);
+    
+    return categoryMatch && filterMatch;
+  });
   
-  const navigateToGiftDetail = (gift: GiftWithPerson) => {
-    router.push({
-      pathname: `/gift-detail/${gift.id}`,
-      params: { personId: gift.personId }
-    });
-  };
+  const totalValue = filteredGifts.reduce((sum, gift) => sum + gift.price, 0);
+  const purchasedValue = filteredGifts.filter(g => g.isPurchased).reduce((sum, gift) => sum + gift.price, 0);
   
-  const renderGiftItem = ({ item }: { item: GiftWithPerson }) => (
+  const renderGiftCard = ({ item }: { item: typeof SAMPLE_GIFTS[0] }) => (
     <TouchableOpacity 
-      style={styles.giftCard} 
-      onPress={() => navigateToGiftDetail(item)}
+      style={styles.giftCardContainer}
+      onPress={() => router.push(`/gift-detail?id=${item.id}&personId=${item.id}`)}
+      activeOpacity={0.9}
     >
-      <ThemedView style={styles.giftCardContent}>
-        <ThemedView style={styles.giftInfo}>
-          <ThemedText type="subtitle">{item.name}</ThemedText>
-          {item.description && (
-            <ThemedText style={styles.giftDescription}>{item.description}</ThemedText>
+      <Card variant={item.isPurchased ? "subtle" : "elevated"} style={styles.giftCard}>
+        <View style={styles.cardHeader}>
+          <View style={styles.giftInfo}>
+            <ThemedText type="h6" color="neutral.charcoal" numberOfLines={1} style={styles.giftName}>
+              {item.name}
+            </ThemedText>
+            <ThemedText type="body2" color="neutral.darkGrey" numberOfLines={2} style={styles.giftDescription}>
+              {item.description}
+            </ThemedText>
+          </View>
+          
+          <View style={styles.priceContainer}>
+            <ThemedText type="h5" color="primary.base" style={styles.price}>
+              ${item.price.toFixed(2)}
+            </ThemedText>
+          </View>
+        </View>
+        
+        <View style={styles.cardMeta}>
+          <View style={styles.metaRow}>
+            <View style={styles.metaItem}>
+              <Ionicons name="person-outline" size={14} color={theme.colors.neutral.darkGrey} />
+              <ThemedText type="caption" color="neutral.darkGrey" style={styles.metaText}>
+                {item.personName}
+              </ThemedText>
+            </View>
+            
+            <View style={styles.metaItem}>
+              <Ionicons name="calendar-outline" size={14} color={theme.colors.neutral.darkGrey} />
+              <ThemedText type="caption" color="neutral.darkGrey" style={styles.metaText}>
+                {item.occasion}
+              </ThemedText>
+            </View>
+          </View>
+          
+          <View style={styles.categoryTag}>
+            <ThemedText type="caption" color="neutral.charcoal">
+              {item.category}
+            </ThemedText>
+          </View>
+        </View>
+        
+        <View style={styles.cardFooter}>
+          {item.isAiSuggested && !item.isPurchased && (
+            <View style={styles.aiBadge}>
+              <Ionicons name="sparkles" size={12} color={theme.colors.secondary.base} />
+              <ThemedText type="caption" color="secondary.base" style={styles.badgeText}>
+                AI Suggested
+              </ThemedText>
+            </View>
           )}
-          <ThemedView style={styles.giftMeta}>
-            {item.price && (
-              <ThemedText style={styles.giftPrice}>${item.price.toFixed(2)}</ThemedText>
-            )}
-            {item.occasion && (
-              <ThemedView style={styles.occasionContainer}>
-                <ThemedText style={styles.occasionText}>{item.occasion}</ThemedText>
-              </ThemedView>
-            )}
-          </ThemedView>
-          <ThemedText style={styles.personText}>For: {item.personName}</ThemedText>
-          {item.isAiSuggested && (
-            <ThemedView style={styles.aiSuggestedContainer}>
-              <ThemedText style={styles.aiSuggestedText}>AI Suggested</ThemedText>
-            </ThemedView>
+          
+          {item.isPurchased && (
+            <View style={styles.purchasedBadge}>
+              <Ionicons name="checkmark-circle" size={12} color={theme.colors.success} />
+              <ThemedText type="caption" color="success" style={styles.badgeText}>
+                Purchased
+              </ThemedText>
+            </View>
           )}
-        </ThemedView>
-      </ThemedView>
+          
+          <View style={styles.priorityBadge}>
+            <ThemedText type="caption" color={item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'neutral.darkGrey'}>
+              {item.priority.charAt(0).toUpperCase() + item.priority.slice(1)} Priority
+            </ThemedText>
+          </View>
+        </View>
+      </Card>
     </TouchableOpacity>
   );
-
+  
+  const renderCategoryFilter = ({ item }: { item: string }) => (
+    <TouchableOpacity
+      style={[
+        styles.categoryFilter,
+        selectedCategory === item && styles.categoryFilterActive
+      ]}
+      onPress={() => setSelectedCategory(item)}
+    >
+      <ThemedText 
+        type="body2" 
+        color={selectedCategory === item ? "neutral.white" : "neutral.charcoal"}
+        style={styles.categoryFilterText}
+      >
+        {item}
+      </ThemedText>
+    </TouchableOpacity>
+  );
+  
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#5AA9E6', dark: '#2C79B9' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.header}>
-          <ThemedText type="title">Gift Ideas</ThemedText>
-          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-gift')}>
-            <ThemedText style={styles.addButtonText}>+</ThemedText>
+    <ThemedView style={styles.container} backgroundColor="neutral.offWhite">
+      {/* Header */}
+      <LinearGradient
+        colors={[theme.colors.primary.base, theme.colors.secondary.base]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <View>
+            <ThemedText type="h1" color="neutral.white" style={styles.headerTitle}>
+              Gifts
+            </ThemedText>
+            <ThemedText type="body1" color="neutral.lightGrey" style={styles.headerSubtitle}>
+              Manage your gift ideas and purchases
+            </ThemedText>
+          </View>
+          <TouchableOpacity 
+            style={styles.addGiftButton}
+            onPress={() => router.push('/add-gift')}
+          >
+            <Ionicons name="add" size={24} color={theme.colors.neutral.white} />
           </TouchableOpacity>
-        </ThemedView>
+        </View>
+      </LinearGradient>
+      
+      {/* Stats Cards */}
+      <View style={styles.statsSection}>
+        <View style={styles.statsRow}>
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="primary.base" style={styles.statValue}>
+              {filteredGifts.length}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Total Gifts
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="success" style={styles.statValue}>
+              ${totalValue.toFixed(0)}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Total Value
+            </ThemedText>
+          </Card>
+          
+          <Card variant="subtle" style={styles.statCard}>
+            <ThemedText type="h4" color="secondary.base" style={styles.statValue}>
+              ${purchasedValue.toFixed(0)}
+            </ThemedText>
+            <ThemedText type="caption" color="neutral.darkGrey">
+              Purchased
+            </ThemedText>
+          </Card>
+        </View>
+      </View>
+      
+      {/* Filters */}
+      <View style={styles.filtersSection}>
+        <View style={styles.filterRow}>
+          <FlatList
+            data={CATEGORIES}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={renderCategoryFilter}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.categoryFilters}
+          />
+        </View>
         
-        <ThemedView style={styles.filtersContainer}>
-          <TouchableOpacity style={[styles.filterButton, styles.filterButtonActive]}>
-            <ThemedText style={styles.filterTextActive}>All</ThemedText>
+        <View style={styles.filterButtons}>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedFilter === 'all' && styles.filterButtonActive
+            ]}
+            onPress={() => setSelectedFilter('all')}
+          >
+            <ThemedText type="caption" color={selectedFilter === 'all' ? "neutral.white" : "neutral.charcoal"}>
+              All
+            </ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton}>
-            <ThemedText style={styles.filterText}>AI Suggested</ThemedText>
+          
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedFilter === 'ai' && styles.filterButtonActive
+            ]}
+            onPress={() => setSelectedFilter('ai')}
+          >
+            <ThemedText type="caption" color={selectedFilter === 'ai' ? "neutral.white" : "neutral.charcoal"}>
+              AI Suggested
+            </ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton}>
-            <ThemedText style={styles.filterText}>Purchased</ThemedText>
+          
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedFilter === 'unpurchased' && styles.filterButtonActive
+            ]}
+            onPress={() => setSelectedFilter('unpurchased')}
+          >
+            <ThemedText type="caption" color={selectedFilter === 'unpurchased' ? "neutral.white" : "neutral.charcoal"}>
+              To Buy
+            </ThemedText>
           </TouchableOpacity>
-        </ThemedView>
-        
+          
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedFilter === 'purchased' && styles.filterButtonActive
+            ]}
+            onPress={() => setSelectedFilter('purchased')}
+          >
+            <ThemedText type="caption" color={selectedFilter === 'purchased' ? "neutral.white" : "neutral.charcoal"}>
+              Purchased
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      {/* Gifts Grid */}
+      <View style={styles.giftsSection}>
         <FlatList
-          data={gifts}
-          renderItem={renderGiftItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
-          scrollEnabled={false} // Disable scrolling since it's already in ParallaxScrollView
+          data={filteredGifts}
+          renderItem={renderGiftCard}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.giftsList}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="gift-outline" size={48} color={theme.colors.neutral.grey} />
+              <ThemedText type="h5" color="neutral.darkGrey" style={styles.emptyTitle}>
+                No gifts found
+              </ThemedText>
+              <ThemedText type="body2" color="neutral.darkGrey" style={styles.emptySubtitle}>
+                Try adjusting your filters or add a new gift idea
+              </ThemedText>
+              <EnhancedButton
+                title="Add Gift"
+                variant="primary"
+                onPress={() => router.push('/add-gift')}
+                style={styles.emptyButton}
+              />
+            </View>
+          }
         />
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'flex-end',
   },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#5AA9E6',
+  headerTitle: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  headerSubtitle: {
+    opacity: 0.9,
+  },
+  addGiftButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addButtonText: {
-    fontSize: 24,
-    color: 'white',
-    fontWeight: 'bold',
+  statsSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
   },
-  filtersContainer: {
+  statsRow: {
     flexDirection: 'row',
-    marginBottom: 16,
-    gap: 8,
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    flex: 1,
+    marginHorizontal: theme.spacing.xxs,
+    alignItems: 'center',
+    padding: theme.spacing.sm,
+  },
+  statValue: {
+    fontWeight: '700',
+    marginBottom: theme.spacing.xxs,
+  },
+  filtersSection: {
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  filterRow: {
+    marginBottom: theme.spacing.md,
+  },
+  categoryFilters: {
+    paddingBottom: theme.spacing.sm,
+  },
+  categoryFilter: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    marginRight: theme.spacing.sm,
+  },
+  categoryFilterActive: {
+    backgroundColor: theme.colors.primary.base,
+  },
+  categoryFilterText: {
+    fontWeight: '500',
+  },
+  filterButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#F8F9FA',
+    flex: 1,
+    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.neutral.lightGrey,
+    alignItems: 'center',
+    marginHorizontal: theme.spacing.xxs,
   },
   filterButtonActive: {
-    backgroundColor: '#5AA9E6',
+    backgroundColor: theme.colors.primary.base,
   },
-  filterText: {
-    fontSize: 14,
-    color: '#6C757D',
+  giftsSection: {
+    flex: 1,
+    paddingHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
   },
-  filterTextActive: {
-    fontSize: 14,
-    color: 'white',
+  giftsList: {
+    paddingBottom: theme.spacing.xl,
   },
-  listContainer: {
-    gap: 16,
+  row: {
+    justifyContent: 'space-between',
+  },
+  giftCardContainer: {
+    width: '48%',
+    marginBottom: theme.spacing.md,
   },
   giftCard: {
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
+    height: 220,
   },
-  giftCardContent: {
-    padding: 16,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.sm,
   },
   giftInfo: {
-    gap: 4,
+    flex: 1,
+    marginRight: theme.spacing.sm,
+  },
+  giftName: {
+    fontWeight: '600',
+    marginBottom: theme.spacing.xxs,
   },
   giftDescription: {
-    fontSize: 14,
-    color: '#6C757D',
+    marginBottom: theme.spacing.xs,
   },
-  giftMeta: {
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  price: {
+    fontWeight: '700',
+  },
+  cardMeta: {
+    marginBottom: theme.spacing.sm,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.xs,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metaText: {
+    marginLeft: theme.spacing.xxs,
+  },
+  categoryTag: {
+    backgroundColor: theme.colors.neutral.lightGrey,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxs,
+    borderRadius: theme.borderRadius.full,
+    alignSelf: 'flex-start',
+  },
+  cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 'auto',
   },
-  giftPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4BB675',
+  aiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.secondary.lighter,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.full,
   },
-  occasionContainer: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+  purchasedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.success + '20',
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.full,
   },
-  occasionText: {
-    fontSize: 12,
-    color: '#6C757D',
+  badgeText: {
+    marginLeft: theme.spacing.xxs,
+    fontWeight: '500',
   },
-  personText: {
-    fontSize: 14,
-    color: '#343A40',
-    marginTop: 8,
+  priorityBadge: {
+    backgroundColor: theme.colors.neutral.lightGrey,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxxs,
+    borderRadius: theme.borderRadius.full,
   },
-  aiSuggestedContainer: {
-    backgroundColor: '#8FDCAF',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-    marginTop: 4,
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xl,
   },
-  aiSuggestedText: {
-    fontSize: 12,
-    color: '#2A744A',
+  emptyTitle: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    opacity: 0.7,
+  emptySubtitle: {
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  emptyButton: {
+    paddingHorizontal: theme.spacing.lg,
   },
 });

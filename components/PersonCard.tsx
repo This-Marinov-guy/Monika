@@ -11,6 +11,7 @@ import {
     View
 } from 'react-native';
 import { Card } from './Card';
+import DefaultProfileImage from './DefaultProfileImage';
 import { EnhancedButton } from './EnhancedButton';
 import { ThemedText } from './ThemedText';
 
@@ -75,9 +76,9 @@ export function PersonCard({
       },
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > SWIPE_THRESHOLD) {
-          forceSwipeRight();
+          forceSwipeRight(gesture.dy);
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
-          forceSwipeLeft();
+          forceSwipeLeft(gesture.dy);
         } else {
           resetPosition();
         }
@@ -85,9 +86,9 @@ export function PersonCard({
     })
   ).current;
   
-  const forceSwipeRight = () => {
+  const forceSwipeRight = (dy: number) => {
     Animated.timing(position, {
-      toValue: { x: SCREEN_WIDTH + 100, y: gesture.dy },
+      toValue: { x: SCREEN_WIDTH + 100, y: dy },
       duration: 250,
       useNativeDriver: true
     }).start(() => {
@@ -95,9 +96,9 @@ export function PersonCard({
     });
   };
   
-  const forceSwipeLeft = () => {
+  const forceSwipeLeft = (dy: number) => {
     Animated.timing(position, {
-      toValue: { x: -SCREEN_WIDTH - 100, y: gesture.dy },
+      toValue: { x: -SCREEN_WIDTH - 100, y: dy },
       duration: 250,
       useNativeDriver: true
     }).start(() => {
@@ -121,18 +122,17 @@ export function PersonCard({
     ]
   };
   
-  // Default image if none provided
-  const imageSource = person.image 
-    ? { uri: person.image } 
-    : require('@/assets/images/app/default-profile.png');
-  
   return (
     <Animated.View 
       style={[styles.container, cardStyle]} 
       {...panResponder.panHandlers}
     >
       <Card variant="profile" style={styles.card}>
-        <Image source={imageSource} style={styles.image} />
+        {person.image ? (
+          <Image source={{ uri: person.image }} style={styles.image} />
+        ) : (
+          <DefaultProfileImage size={SCREEN_WIDTH - 32} name={person.name} />
+        )}
         
         {/* Gradient overlay at the bottom */}
         <LinearGradient
