@@ -1,0 +1,710 @@
+{
+  "name": "Mabel Mobile Design System",
+  "version": "1.0.0",
+  "description": "A comprehensive design system for the Mabel mobile app with earthy green and boy blue color scheme",
+  "colorPalette": {
+    "primary": {
+      "base": "#4BB675",
+      "light": "#6DC990",
+      "lighter": "#8FDC9F",
+      "dark": "#3A9560",
+      "darker": "#2A744A"
+    },
+    "secondary": {
+      "base": "#5AA9E6",
+      "light": "#7BBCEF",
+      "lighter": "#A0D0F8",
+      "dark": "#3F92D2",
+      "darker": "#2C79B9"
+    },
+    "neutral": {
+      "white": "#FFFFFF",
+      "offWhite": "#F8F9FA",
+      "lightGrey": "#E9ECEF",
+      "grey": "#CED4DA",
+      "darkGrey": "#6C757D",
+      "charcoal": "#343A40",
+      "black": "#212529"
+    },
+    "success": "#28A745",
+    "warning": "#FFC107",
+    "error": "#DC3545",
+    "info": "#17A2B8",
+    "gradients": {
+      "primary": "linear-gradient(60deg, #3A9560, #4BB675, #6DC990)",
+      "secondary": "linear-gradient(60deg, #3F92D2, #5AA9E6, #7BBCEF)",
+      "feature": "linear-gradient(60deg, #3A9560, #4BB675, #5AA9E6, #3F92D2)"
+    },
+    "darkMode": {
+      "background": {
+        "primary": "#121212",
+        "secondary": "#1E1E1E",
+        "tertiary": "#252525"
+      },
+      "text": {
+        "primary": "#F8F9FA",
+        "secondary": "#CED4DA",
+        "tertiary": "#6C757D"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "primary": "Satoshi",
+      "secondary": "sans-serif"
+    },
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semiBold": 600,
+      "bold": 700,
+      "extraBold": 800
+    },
+    "sizes": {
+      "h1": {
+        "fontSize": 32,
+        "lineHeight": 40,
+        "letterSpacing": -0.5,
+        "weight": "extraBold"
+      },
+      "h2": {
+        "fontSize": 28,
+        "lineHeight": 36,
+        "letterSpacing": -0.5,
+        "weight": "bold"
+      },
+      "h3": {
+        "fontSize": 24,
+        "lineHeight": 32,
+        "letterSpacing": -0.25,
+        "weight": "bold"
+      },
+      "h4": {
+        "fontSize": 20,
+        "lineHeight": 28,
+        "letterSpacing": 0,
+        "weight": "semiBold"
+      },
+      "h5": {
+        "fontSize": 18,
+        "lineHeight": 24,
+        "letterSpacing": 0,
+        "weight": "semiBold"
+      },
+      "h6": {
+        "fontSize": 16,
+        "lineHeight": 22,
+        "letterSpacing": 0,
+        "weight": "semiBold"
+      },
+      "body1": {
+        "fontSize": 16,
+        "lineHeight": 24,
+        "letterSpacing": 0.1,
+        "weight": "regular"
+      },
+      "body2": {
+        "fontSize": 14,
+        "lineHeight": 20,
+        "letterSpacing": 0.1,
+        "weight": "regular"
+      },
+      "caption": {
+        "fontSize": 12,
+        "lineHeight": 16,
+        "letterSpacing": 0.2,
+        "weight": "regular"
+      },
+      "overline": {
+        "fontSize": 10,
+        "lineHeight": 14,
+        "letterSpacing": 0.4,
+        "weight": "medium",
+        "textTransform": "uppercase"
+      },
+      "button": {
+        "fontSize": 16,
+        "lineHeight": 24,
+        "letterSpacing": 0.1,
+        "weight": "semiBold"
+      }
+    }
+  },
+  "spacing": {
+    "xxxs": 2,
+    "xxs": 4,
+    "xs": 8,
+    "sm": 12,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 40,
+    "xxxl": 48,
+    "4xl": 56,
+    "5xl": 64,
+    "6xl": 72,
+    "7xl": 80
+  },
+  "borderRadius": {
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "full": 999
+  },
+  "shadows": {
+    "xs": {
+      "shadowOffset": { "width": 0, "height": 1 },
+      "shadowOpacity": 0.1,
+      "shadowRadius": 2,
+      "elevation": 1
+    },
+    "sm": {
+      "shadowOffset": { "width": 0, "height": 2 },
+      "shadowOpacity": 0.1,
+      "shadowRadius": 4,
+      "elevation": 2
+    },
+    "md": {
+      "shadowOffset": { "width": 0, "height": 3 },
+      "shadowOpacity": 0.15,
+      "shadowRadius": 6,
+      "elevation": 4
+    },
+    "lg": {
+      "shadowOffset": { "width": 0, "height": 4 },
+      "shadowOpacity": 0.15,
+      "shadowRadius": 8,
+      "elevation": 6
+    },
+    "xl": {
+      "shadowOffset": { "width": 0, "height": 6 },
+      "shadowOpacity": 0.15,
+      "shadowRadius": 12,
+      "elevation": 8
+    }
+  },
+  "components": {
+    "Button": {
+      "variants": {
+        "primary": {
+          "backgroundColor": "$primary.base",
+          "paddingHorizontal": "$md",
+          "paddingVertical": "$sm",
+          "borderRadius": "$md",
+          "textColor": "$neutral.white",
+          "fontWeight": "semiBold",
+          "states": {
+            "pressed": {
+              "backgroundColor": "$primary.dark",
+              "opacity": 0.9
+            },
+            "disabled": {
+              "backgroundColor": "$neutral.grey",
+              "textColor": "$neutral.darkGrey"
+            }
+          }
+        },
+        "secondary": {
+          "backgroundColor": "$secondary.base",
+          "paddingHorizontal": "$md",
+          "paddingVertical": "$sm",
+          "borderRadius": "$md",
+          "textColor": "$neutral.white",
+          "fontWeight": "semiBold",
+          "states": {
+            "pressed": {
+              "backgroundColor": "$secondary.dark",
+              "opacity": 0.9
+            },
+            "disabled": {
+              "backgroundColor": "$neutral.grey",
+              "textColor": "$neutral.darkGrey"
+            }
+          }
+        },
+        "outline": {
+          "backgroundColor": "transparent",
+          "paddingHorizontal": "$md",
+          "paddingVertical": "$sm",
+          "borderRadius": "$md",
+          "borderWidth": 1,
+          "borderColor": "$primary.base",
+          "textColor": "$primary.base",
+          "fontWeight": "semiBold",
+          "states": {
+            "pressed": {
+              "backgroundColor": "$primary.lighter",
+              "opacity": 0.1
+            },
+            "disabled": {
+              "borderColor": "$neutral.grey",
+              "textColor": "$neutral.darkGrey"
+            }
+          }
+        },
+        "gradient": {
+          "backgroundGradient": "$gradients.feature",
+          "paddingHorizontal": "$md",
+          "paddingVertical": "$sm",
+          "borderRadius": "$md",
+          "textColor": "$neutral.white",
+          "fontWeight": "semiBold",
+          "states": {
+            "pressed": {
+              "opacity": 0.9
+            },
+            "disabled": {
+              "opacity": 0.5
+            }
+          }
+        },
+        "text": {
+          "backgroundColor": "transparent",
+          "paddingHorizontal": "$md",
+          "paddingVertical": "$sm",
+          "textColor": "$primary.base",
+          "fontWeight": "semiBold",
+          "states": {
+            "pressed": {
+              "opacity": 0.7
+            },
+            "disabled": {
+              "textColor": "$neutral.darkGrey",
+              "opacity": 0.5
+            }
+          }
+        }
+      },
+      "sizes": {
+        "sm": {
+          "height": 36,
+          "fontSize": 14
+        },
+        "md": {
+          "height": 44,
+          "fontSize": 16
+        },
+        "lg": {
+          "height": 52,
+          "fontSize": 16
+        }
+      }
+    },
+    "Card": {
+      "default": {
+        "backgroundColor": "$neutral.white",
+        "borderRadius": "$md",
+        "padding": "$md",
+        "shadowLevel": "md"
+      },
+      "variants": {
+        "elevated": {
+          "backgroundColor": "$neutral.white",
+          "borderRadius": "$md",
+          "padding": "$md",
+          "shadowLevel": "lg"
+        },
+        "outlined": {
+          "backgroundColor": "$neutral.white",
+          "borderRadius": "$md",
+          "padding": "$md",
+          "borderWidth": 1,
+          "borderColor": "$neutral.lightGrey"
+        },
+        "flat": {
+          "backgroundColor": "$neutral.offWhite",
+          "borderRadius": "$md",
+          "padding": "$md"
+        }
+      }
+    },
+    "Input": {
+      "default": {
+        "height": 44,
+        "borderWidth": 1,
+        "borderColor": "$neutral.grey",
+        "borderRadius": "$md",
+        "paddingHorizontal": "$md",
+        "backgroundColor": "$neutral.white",
+        "textColor": "$neutral.black",
+        "fontSize": 16,
+        "states": {
+          "focused": {
+            "borderColor": "$primary.base"
+          },
+          "error": {
+            "borderColor": "$error"
+          },
+          "disabled": {
+            "backgroundColor": "$neutral.lightGrey",
+            "opacity": 0.7
+          }
+        }
+      }
+    },
+    "Toggle": {
+      "default": {
+        "trackWidth": 50,
+        "trackHeight": 28,
+        "thumbSize": 24,
+        "trackColorOff": "$neutral.grey",
+        "trackColorOn": "$primary.base",
+        "thumbColorOff": "$neutral.white",
+        "thumbColorOn": "$neutral.white"
+      }
+    },
+    "TabBar": {
+      "default": {
+        "backgroundColor": "$neutral.white",
+        "activeColor": "$primary.base",
+        "inactiveColor": "$neutral.darkGrey",
+        "indicatorColor": "$primary.base",
+        "indicatorHeight": 2,
+        "paddingVertical": "$sm"
+      }
+    },
+    "Badge": {
+      "variants": {
+        "primary": {
+          "backgroundColor": "$primary.lighter",
+          "textColor": "$primary.darker",
+          "paddingHorizontal": "$xs",
+          "paddingVertical": "$xxxs",
+          "borderRadius": "$full",
+          "fontSize": 12
+        },
+        "secondary": {
+          "backgroundColor": "$secondary.lighter",
+          "textColor": "$secondary.darker",
+          "paddingHorizontal": "$xs",
+          "paddingVertical": "$xxxs",
+          "borderRadius": "$full",
+          "fontSize": 12
+        }
+      }
+    },
+    "Avatar": {
+      "sizes": {
+        "xs": 24,
+        "sm": 32,
+        "md": 40,
+        "lg": 48,
+        "xl": 64
+      }
+    },
+    "ProgressBar": {
+      "default": {
+        "height": 4,
+        "backgroundColor": "$neutral.lightGrey",
+        "filledColor": "$primary.base",
+        "borderRadius": "$full"
+      }
+    },
+    "Chart": {
+      "colors": [
+        "$primary.base",
+        "$secondary.base",
+        "$primary.light",
+        "$secondary.light",
+        "$primary.dark",
+        "$secondary.dark"
+      ],
+      "gridLineColor": "$neutral.lightGrey",
+      "labelColor": "$neutral.darkGrey"
+    }
+  },
+  "icons": {
+    "sizes": {
+      "sm": 16,
+      "md": 24,
+      "lg": 32,
+      "xl": 40
+    },
+    "sets": {
+      "navigation": {
+        "home": "home",
+        "dashboard": "dashboard",
+        "settings": "settings",
+        "analytics": "bar-chart-2",
+        "projects": "folder",
+        "revenue": "dollar-sign",
+        "conversions": "target",
+        "realtime": "activity"
+      },
+      "actions": {
+        "add": "plus",
+        "remove": "minus",
+        "edit": "edit-2",
+        "delete": "trash-2",
+        "save": "save",
+        "share": "share",
+        "search": "search",
+        "filter": "filter",
+        "sort": "bar-chart",
+        "refresh": "refresh-cw",
+        "more": "more-horizontal"
+      },
+      "indicators": {
+        "success": "check-circle",
+        "warning": "alert-triangle",
+        "error": "alert-circle",
+        "info": "info"
+      },
+      "misc": {
+        "user": "user",
+        "team": "users",
+        "calendar": "calendar",
+        "clock": "clock",
+        "globe": "globe",
+        "link": "link",
+        "mail": "mail",
+        "phone": "phone",
+        "lock": "lock",
+        "eye": "eye",
+        "eyeOff": "eye-off",
+        "bell": "bell",
+        "menu": "menu",
+        "close": "x",
+        "chevronLeft": "chevron-left",
+        "chevronRight": "chevron-right",
+        "chevronUp": "chevron-up",
+        "chevronDown": "chevron-down",
+        "arrowLeft": "arrow-left",
+        "arrowRight": "arrow-right",
+        "arrowUp": "arrow-up",
+        "arrowDown": "arrow-down"
+      }
+    }
+  },
+  "animations": {
+    "timing": {
+      "quick": 150,
+      "default": 250,
+      "medium": 350,
+      "slow": 500
+    },
+    "easing": {
+      "default": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+      "accelerate": "cubic-bezier(0.4, 0.0, 1, 1)",
+      "decelerate": "cubic-bezier(0.0, 0.0, 0.2, 1)"
+    },
+    "definitions": {
+      "fadeIn": {
+        "from": { "opacity": 0 },
+        "to": { "opacity": 1 },
+        "duration": 250,
+        "easing": "cubic-bezier(0.0, 0.0, 0.2, 1)"
+      },
+      "fadeOut": {
+        "from": { "opacity": 1 },
+        "to": { "opacity": 0 },
+        "duration": 200,
+        "easing": "cubic-bezier(0.4, 0.0, 1, 1)"
+      },
+      "slideInUp": {
+        "from": { "transform": "translateY(20px)", "opacity": 0 },
+        "to": { "transform": "translateY(0px)", "opacity": 1 },
+        "duration": 300,
+        "easing": "cubic-bezier(0.0, 0.0, 0.2, 1)"
+      },
+      "slideOutDown": {
+        "from": { "transform": "translateY(0px)", "opacity": 1 },
+        "to": { "transform": "translateY(20px)", "opacity": 0 },
+        "duration": 250,
+        "easing": "cubic-bezier(0.4, 0.0, 1, 1)"
+      },
+      "scaleIn": {
+        "from": { "transform": "scale(0.9)", "opacity": 0 },
+        "to": { "transform": "scale(1)", "opacity": 1 },
+        "duration": 250,
+        "easing": "cubic-bezier(0.0, 0.0, 0.2, 1)"
+      },
+      "shimmer": {
+        "0%": { "backgroundPosition": "0% 50%" },
+        "50%": { "backgroundPosition": "100% 50%" },
+        "100%": { "backgroundPosition": "0% 50%" },
+        "duration": 3000,
+        "iterations": "infinite"
+      },
+      "pulse": {
+        "0%": { "opacity": 1 },
+        "50%": { "opacity": 0.5 },
+        "100%": { "opacity": 1 },
+        "duration": 1500,
+        "iterations": "infinite"
+      }
+    }
+  },
+  "screenLayouts": {
+    "margins": {
+      "horizontal": 16,
+      "vertical": 16
+    },
+    "safeAreaInsets": {
+      "top": "platform",
+      "bottom": "platform"
+    },
+    "grid": {
+      "columns": 4,
+      "gutter": 16
+    }
+  },
+  "flows": {
+    "authentication": {
+      "screens": [
+        {
+          "name": "SignIn",
+          "description": "Email authentication screen",
+          "components": ["Logo", "EmailInput", "SignInButton", "SupportLink"],
+          "transitions": {
+            "onSuccess": "Dashboard",
+            "onSupport": "Support"
+          }
+        }
+      ]
+    },
+    "dashboard": {
+      "screens": [
+        {
+          "name": "Overview",
+          "description": "Main dashboard with key metrics",
+          "components": ["DashboardMetrics", "VisitorChart", "RevenueOverview", "RecentVisitors"],
+          "transitions": {
+            "onMetricTap": "MetricDetail",
+            "onVisitorTap": "VisitorDetail"
+          }
+        },
+        {
+          "name": "Insights",
+          "description": "Insights and analytics page",
+          "components": ["InsightsMetrics", "TopSources", "TopPages", "ConversionFunnel"],
+          "transitions": {
+            "onInsightTap": "InsightDetail"
+          }
+        },
+        {
+          "name": "Revenue",
+          "description": "Revenue analytics and tracking",
+          "components": ["RevenueTimeline", "RevenueBySource", "RecentTransactions"],
+          "transitions": {
+            "onTransactionTap": "TransactionDetail"
+          }
+        },
+        {
+          "name": "Projects",
+          "description": "Project management screen",
+          "components": ["ProjectSelector", "ProjectsManagement"],
+          "transitions": {
+            "onProjectTap": "ProjectDetail",
+            "onNewProject": "CreateProject"
+          }
+        },
+        {
+          "name": "Realtime",
+          "description": "Realtime visitor tracking",
+          "components": ["RealtimeStats", "RealtimeVisitors", "RealtimeGlobe"],
+          "transitions": {
+            "onVisitorTap": "VisitorDetail"
+          }
+        },
+        {
+          "name": "Settings",
+          "description": "App settings screen",
+          "components": ["SettingsTabs", "AccountSettings", "ApiSettings", "ThemeSettings"],
+          "transitions": {
+            "onLogout": "SignIn"
+          }
+        }
+      ]
+    },
+    "onboarding": {
+      "screens": [
+        {
+          "name": "Welcome",
+          "description": "Initial onboarding welcome screen",
+          "components": ["Logo", "OnboardingTitle", "OnboardingDescription", "GetStartedButton"],
+          "transitions": {
+            "onNext": "Step1"
+          },
+          "animations": {
+            "entry": "fadeIn",
+            "exit": "fadeOut"
+          }
+        },
+        {
+          "name": "Step1",
+          "description": "Add your first website",
+          "components": ["StepIndicator", "WebsiteForm", "ContinueButton", "SkipButton"],
+          "transitions": {
+            "onNext": "Step2",
+            "onSkip": "Dashboard"
+          },
+          "animations": {
+            "entry": "slideInUp",
+            "exit": "fadeOut"
+          }
+        },
+        {
+          "name": "Step2",
+          "description": "Install tracking code",
+          "components": ["StepIndicator", "TrackingCodeDisplay", "CopyCodeButton", "ContinueButton"],
+          "transitions": {
+            "onNext": "Step3",
+            "onSkip": "Dashboard"
+          },
+          "animations": {
+            "entry": "slideInUp",
+            "exit": "fadeOut"
+          }
+        },
+        {
+          "name": "Step3",
+          "description": "Set conversion goals",
+          "components": ["StepIndicator", "ConversionGoalForm", "FinishButton"],
+          "transitions": {
+            "onFinish": "Dashboard"
+          },
+          "animations": {
+            "entry": "slideInUp",
+            "exit": "fadeOut"
+          }
+        }
+      ]
+    }
+  },
+  "accessibility": {
+    "minimumTouchableSize": 44,
+    "contrastRequirements": {
+      "normalText": 4.5,
+      "largeText": 3.0
+    }
+  },
+  "darkModeMapping": {
+    "colors": {
+      "primary.base": "primary.base",
+      "primary.light": "primary.light",
+      "primary.dark": "primary.darker",
+      "secondary.base": "secondary.base",
+      "secondary.light": "secondary.light",
+      "secondary.dark": "secondary.darker",
+      "neutral.white": "darkMode.background.primary",
+      "neutral.offWhite": "darkMode.background.secondary",
+      "neutral.lightGrey": "darkMode.background.tertiary",
+      "neutral.black": "darkMode.text.primary",
+      "neutral.charcoal": "darkMode.text.secondary",
+      "neutral.darkGrey": "darkMode.text.tertiary"
+    },
+    "components": {
+      "Card.default.backgroundColor": "darkMode.background.secondary",
+      "Card.variants.elevated.backgroundColor": "darkMode.background.secondary",
+      "Card.variants.outlined.backgroundColor": "darkMode.background.secondary",
+      "Card.variants.outlined.borderColor": "darkMode.background.tertiary",
+      "Card.variants.flat.backgroundColor": "darkMode.background.tertiary",
+      "Input.default.backgroundColor": "darkMode.background.tertiary",
+      "Input.default.textColor": "darkMode.text.primary",
+      "Input.default.borderColor": "darkMode.background.tertiary"
+    }
+  }
+}

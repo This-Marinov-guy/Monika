@@ -1,51 +1,104 @@
-# Welcome to your Expo app 👋
+# Monika - Gift & Flower Assistant
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Monika is a personal assistant app to help you remember important dates, manage gift ideas, and schedule flowers for the people you care about.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **People Catalogue**: Keep track of people in your life with their preferences and important dates
+- **Gift Management**: Store gift ideas for each person and get AI-powered suggestions
+- **Flower Scheduling**: Schedule flowers for important dates and random occasions
+- **Notifications**: Get reminders for upcoming events through push notifications and Google Calendar
+- **Authentication**: Secure user accounts with email/password and Google OAuth
+- **Database**: PostgreSQL database with Supabase for storage and authentication
 
+## Tech Stack
+
+- **Frontend**: React Native with Expo
+- **Styling**: Custom design system based on Mabel Mobile Design System
+- **Backend**: Supabase (PostgreSQL + Authentication)
+- **Notifications**: Expo Notifications + Google Calendar API
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js v14+
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
+- Supabase account (for backend)
+
+### Environment Setup
+
+1. Clone this repository
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
+3. Create a Supabase project at [supabase.com](https://supabase.com)
+4. Set up your Supabase URL and anon key in `services/supabaseClient.ts`:
+   ```typescript
+   const SUPABASE_URL = 'your-supabase-project-url';
+   const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
    ```
 
-In the output, you'll find options to open the app in a
+### Database Setup
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Run the database migration script in the Supabase SQL editor:
+   - Copy the contents of `db/migrations/001_create_initial_schema.sql`
+   - Paste into Supabase SQL editor and execute
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+2. Enable the required OAuth providers in Supabase:
+   - Go to Authentication > Providers
+   - Enable Email/Password and Google OAuth
+   - Configure Google OAuth with required scopes for Google Calendar
 
-## Get a fresh project
+### Running the App
 
-When you're ready, run:
-
+Start the development server:
 ```bash
-npm run reset-project
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This will open Expo Developer Tools where you can run the app on:
+- iOS simulator (macOS only)
+- Android emulator
+- Physical device using the Expo Go app
+- Web browser (limited functionality)
 
-## Learn more
+## Project Structure
 
-To learn more about developing your project with Expo, look at the following resources:
+- `app/` - Application screens using Expo Router
+  - `(tabs)/` - Main tab screens
+  - `auth/` - Authentication screens
+- `components/` - Reusable UI components
+- `constants/` - App constants including colors
+- `context/` - React context providers (Auth)
+- `db/` - Database migrations and schemas
+- `hooks/` - Custom React hooks
+- `models/` - TypeScript interfaces for data models
+- `services/` - API and database services
+- `utils/` - Utility functions
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Authentication and Security
 
-## Join the community
+The app implements a secure authentication flow with:
+- Email/password authentication
+- Password reset functionality
+- Google OAuth integration
+- Protected routes for authenticated users
+- Row-level security in the database
 
-Join our community of developers creating universal apps.
+## Data Model
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# Monika
+The database schema includes the following tables:
+- `users` - User accounts (managed by Supabase Auth)
+- `persons` - People in the user's catalogue
+- `important_dates` - Birthdays, anniversaries, and custom dates
+- `gift_ideas` - Gift ideas for each person
+- `flower_schedules` - Flower scheduling preferences for each person
+- `reminders` - Upcoming reminders for gifts and flowers
+- `user_settings` - User preferences for notifications
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
